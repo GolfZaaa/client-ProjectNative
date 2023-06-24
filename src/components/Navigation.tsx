@@ -3,8 +3,8 @@ import React from 'react'
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from '../screens/HomeScreen';
-import LoginScreen from '../features/account/LoginScreen';
-import RegisterScreen from '../features/account/RegisterScreen';
+import LoginScreen from '../features/product/ProductScreen';
+import RegisterScreen from '../features/product/RegisterScreen';
 import ProducuDetail from '../screens/ProducuDetailScreen';
 import ProducuDetailScreen from '../screens/ProducuDetailScreen';
 
