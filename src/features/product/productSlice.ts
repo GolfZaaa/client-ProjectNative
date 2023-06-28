@@ -8,6 +8,7 @@ interface products {
   price: number;
   quantityInStock: number;
   description: string;
+  type: string;
   imageUrls: string[];
 }
 
@@ -80,4 +81,5 @@ const productSlice = createSlice({
 export const selectProducts = (state: RootState) => state.product.products;
 export const isLoading = (state: RootState) => state.product.isLoading;
 export const selectType = (state: RootState) => state.product.type;
+
 export default productSlice.reducer;
