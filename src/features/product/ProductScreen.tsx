@@ -20,18 +20,19 @@ import {
 } from "./productSlice";
 import { AnyAction } from "@reduxjs/toolkit";
 import LottieView from "lottie-react-native";
-import { AntDesign } from '@expo/vector-icons';
+import { AntDesign } from "@expo/vector-icons";
 
 import { Feather } from "@expo/vector-icons";
+import Sildemenu from "../component/Sildemenu";
+import StackCart from "../../components/StackCart";
 
 const ProductScreen = ({ navigation }: any) => {
   const dispatch = useDispatch();
   const loading = useSelector(isLoading);
 
-  
-
   //ฟังก์ชั่น Select Product Start
   const products = useSelector(selectProducts);
+  console.log(products)
 
   const [searchText, setSearchText] = useState("");
   const [filteredProducts, setFilteredProducts] = useState<any[]>(products);
@@ -56,7 +57,7 @@ const ProductScreen = ({ navigation }: any) => {
 
     fetchData();
   }, [dispatch]);
-  console.log(products);
+  // console.log(products);
   //แสดงข้อมูล Product End
 
   //แสดลงข้อมูล Type Start
@@ -105,20 +106,12 @@ const ProductScreen = ({ navigation }: any) => {
     );
   }
 
+
   return (
     <View style={{ backgroundColor: "white", height: "100%" }}>
-      <Text style={styles.title}>
-       Product Collections
-    </Text>
+      <Text style={styles.title}>Product Collections</Text>
 
-    <TouchableOpacity style={{position:'absolute',left:335,top:60}}>
-    <AntDesign  name="shoppingcart" size={30} color="black" />
-    </TouchableOpacity>
-
-
-      <Text style={{ color: "gray", marginLeft: 30, fontSize: 15 }}>
-        The best of food collections, all in one place.
-      </Text>
+      <Sildemenu navigation={navigation} />
 
       <View style={styles.searchContainer}>
         <Feather
@@ -144,7 +137,7 @@ const ProductScreen = ({ navigation }: any) => {
         </Text>
       </View>
 
-      <View >
+      <View>
         <ScrollView horizontal>
           <View
             style={{
@@ -184,6 +177,7 @@ const ProductScreen = ({ navigation }: any) => {
       <ScrollView>
         {filteredProducts.map((product: any) => (
           <TouchableOpacity
+          key={product.id}
             onPress={() =>
               navigation.push("productDetail", { productId: product })
             }
@@ -222,7 +216,6 @@ const ProductScreen = ({ navigation }: any) => {
                     right: 4,
                   }}
                 >
-                  {" "}
                   {product.description.substring(0, 20)}
                 </Text>
                 <Text style={{ color: "gray" }}>
@@ -265,12 +258,12 @@ const ProductScreen = ({ navigation }: any) => {
 
 const styles = StyleSheet.create({
   title: {
-    marginTop: 60,
+    marginTop: 100,
     marginLeft: 30,
     marginRight: 30,
     fontSize: 25,
     fontWeight: "600",
-    marginBottom: 10,
+    marginBottom: 5,
   },
   searchContainer: {
     flexDirection: "row",
@@ -330,18 +323,18 @@ const styles = StyleSheet.create({
     borderRadius: 35,
   },
   button: {
-    backgroundColor: '#4b4b4b',
+    backgroundColor: "#4b4b4b",
     paddingVertical: 5,
     paddingHorizontal: 17,
     borderRadius: 11,
-    width:60,
-    left:80,
-    bottom:5
+    width: 60,
+    left: 80,
+    bottom: 5,
   },
   buttonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 14,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });
 

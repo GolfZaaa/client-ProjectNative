@@ -1,14 +1,41 @@
 import { StyleSheet, Text, View, Image, TouchableOpacity, ScrollView, Animated } from "react-native";
 import React, { useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { selectProducts } from "./productSlice";
 import { Ionicons } from '@expo/vector-icons';
+import { selectuserid } from "../account/accountSlice";
+import { addProductAsync, getCartAsync, selectCartItems } from "../cart/cartSlice";
+import { AnyAction } from "@reduxjs/toolkit";
 
 const ProductDetailScreen = ({ navigation, route }: any) => {
+  const dispatch = useDispatch();
+
+  const [quantity, setQuantity] = useState(1);
+  const cart: any = useSelector(selectCartItems);
   const { productId } = route.params;
   const products = useSelector(selectProducts);
 
-  const [quantity, setQuantity] = useState(1);
+  const userId = useSelector(selectuserid);
+  console.log(userId);
+
+
+
+
+  const AddProduct = () => {
+    dispatch(addProductAsync({ userId, amount: quantity, productId: productId.id }) as any)
+      .then(() => {
+        dispatch(getCartAsync({ userId }) as any)
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "homeproduct" }], // รีหน้า
+        });
+      });
+  };
+  
+  
+
+
+
   const [slideAnim] = useState(new Animated.Value(0)); // สร้าง Animated Value
 
   const handleProductSelection = (product: any) => {
@@ -55,6 +82,7 @@ const ProductDetailScreen = ({ navigation, route }: any) => {
     transform: [{ translateY: translateYInterpolate }],
   };
 
+
   return (
     <View style={styles.container}>
       <ScrollView onScroll={handleScroll} scrollEventThrottle={16}>
@@ -68,7 +96,8 @@ const ProductDetailScreen = ({ navigation, route }: any) => {
 
           <View style={{ margin: 25 }}>
             <Text style={{ fontSize: 25, fontWeight: '500', marginBottom: 5 }}>{productId.name}</Text>
-            <Text style={{ color: 'gray', fontSize: 17 }}>{productId.type} </Text>
+            <Text style={{ color: 'gray', fontSize: 17 }}>Type : {productId.type} </Text>
+            <Text style={{ color: 'gray', fontSize: 17 }}>calorie : {productId.calorie} </Text>
             <Text style={{ left: 275, position: 'absolute', top: 35, fontSize: 25, fontWeight: '700' }}>${productId.price}</Text>
 
             <View>
@@ -120,9 +149,10 @@ const ProductDetailScreen = ({ navigation, route }: any) => {
         <Text style={styles.quantityButton}>+</Text>
       </TouchableOpacity>
           </View>
-        <TouchableOpacity style={styles.buyButton}>
-          <Text style={styles.buyButtonText}>Add To Cart</Text>
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.buyButton} onPress={() => AddProduct()}>
+  <Text style={styles.buyButtonText}>Add To Cart</Text>
+</TouchableOpacity>
+
       </Animated.View>
     </View>
 
@@ -137,7 +167,6 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     backgroundColor: "#fff",
-
   },
   recommendedTitle: {
     top: 100,

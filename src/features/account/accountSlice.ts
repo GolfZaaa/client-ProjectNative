@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../../api/store";
 import agent from "../../api/agent";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface AccountState {
   email: string;
@@ -9,7 +10,8 @@ interface AccountState {
   password: string;
   isLoading: boolean;
   error: string | null;
-  token: string | null; // เพิ่มพร็อปเพอร์ตี้ token ที่ใช้เก็บโทเค็น
+  token: string | null; 
+  userid : string;
 }
 
 const initialState: AccountState = {
@@ -20,13 +22,13 @@ const initialState: AccountState = {
   isLoading: false,
   error: null,
   token: null,
+  userid : "",
 };
 
 export const loginAsync = createAsyncThunk(
   "Authentication/Login",
   async ({ username, password }: { username: string; password: string }) => {
     const response = await agent.Account.login({ username, password });
-    console.log(response);
     return response;
   }
 );
@@ -75,8 +77,15 @@ const accountSlice = createSlice({
   reducers: {
     updateToken: (state, action) => {
       state.token = action.payload;
+      state.email = action.payload;
+      AsyncStorage.removeItem('token');
+    },
+    updateUserId: (state, action) => {
+      state.userid = action.payload;
+      AsyncStorage.removeItem('userid');
     },
   },
+  
   extraReducers: (builder) => {
     builder
       .addCase(loginAsync.pending, (state) => {
@@ -85,8 +94,12 @@ const accountSlice = createSlice({
       })
       .addCase(loginAsync.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.username = action.payload.email; // เก็บข้อมูลผู้ใช้งานใน state
-        state.token = action.payload.token; // เก็บค่าโทเค็นใน state
+        state.username = action.payload.username; 
+        state.email = action.payload.email;
+        state.token = action.payload.token; 
+        state.userid = action.payload.userid;
+        AsyncStorage.setItem('token',action.payload.token)
+        AsyncStorage.setItem('userId',action.payload.userid)
       })
       .addCase(loginAsync.rejected, (state, action) => {
         state.isLoading = false;
@@ -128,7 +141,9 @@ export const selectError = (state: RootState) => state.account.error;
 export const selectToken = (state: RootState) => state.account.token;
 export const selectEmail = (state: RootState) => state.account.email;
 export const selectusername = (state: RootState) => state.account.username;
+export const selectuserid = (state: RootState) => state.account.userid;
 
-export const { updateToken } = accountSlice.actions;
+
+export const { updateToken,updateUserId } = accountSlice.actions;
 
 export default accountSlice.reducer;

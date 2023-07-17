@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import ProductScreen from "../features/product/ProductScreen";
 import HomeScreen from "../screens/HomeScreen";
 import ProducuDetailScreen from "../features/product/ProducuDetailScreen";
+import SettingUser from "../features/account/SettingUser";
 
 const Stack = createNativeStackNavigator();
 
@@ -18,6 +19,11 @@ const StackProduct = () => {
       <Stack.Screen
         name="productDetail"
         component={ProducuDetailScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="setting"
+        component={SettingUser}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

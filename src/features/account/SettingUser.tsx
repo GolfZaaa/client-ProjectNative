@@ -1,24 +1,34 @@
 import React, { useState } from "react";
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { selectToken, selectusername, updateToken } from "./accountSlice";
+import { selectEmail, selectToken, selectusername, updateToken } from "./accountSlice";
 import { FontAwesome } from '@expo/vector-icons';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const SettingUser = () => {
+const SettingUser = ({navigation}:any) => {
     
   const dispatch = useDispatch();
   const token = useSelector(selectToken);
-  const email = useSelector(selectusername);
+  const email = useSelector(selectEmail);
 
 
   console.log(email);
 
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     if (token !== "") {
-      dispatch(updateToken(null)); // ส่ง action เพื่ออัปเดตค่า token เป็น null โดยตรง
+      try {
+        await AsyncStorage.removeItem('token');
+        await AsyncStorage.removeItem('userid');
+        dispatch(updateToken(null));
+      } catch (error) {
+        console.log("Error removing token:", error);
+      }
     }
   };
+  
+  
+  
 
 
   return (

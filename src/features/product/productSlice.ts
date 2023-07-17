@@ -28,7 +28,6 @@ export const fetchProductAsync = createAsyncThunk(
   "Product/Get",
   async (values) => {
     const response = await agent.Product.getproduct(values);
-    console.log(response);
     return response;
   }
 );
@@ -37,7 +36,6 @@ export const fetchTypeAsync = createAsyncThunk(
   "Product/GetTypes",
   async (values) => {
     const response = await agent.Product.getType(values);
-    console.log(response);
     return response;
   }
 )
