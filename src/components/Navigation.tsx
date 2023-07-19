@@ -7,7 +7,14 @@ import ProductScreen from "../features/product/ProductScreen";
 import RegisterScreen from "../features/account/RegisterScreen";
 import ProducuDetailScreen from "../features/product/ProducuDetailScreen";
 import { useDispatch, useSelector } from "react-redux";
-import { selectToken, selectuserid, updateToken, updateUserId } from "../features/account/accountSlice";
+import {
+  anonymousUser,
+  selectToken,
+  selectanonymous,
+  selectuserid,
+  updateToken,
+  updateUserId,
+} from "../features/account/accountSlice";
 import ConfirmEmailUser from "../features/account/ConfirmEmailUser";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import StackProduct from "./StackProduct";
@@ -21,49 +28,55 @@ import { getCartAsync, selectCartItems } from "../features/cart/cartSlice";
 import { AnyAction } from "@reduxjs/toolkit";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import StackHistory from "./StackHistory";
-import { FontAwesome5 } from '@expo/vector-icons';
+import { FontAwesome5 } from "@expo/vector-icons";
 import Toast from "../features/component/AlertToast";
 import StackOnboard from "./StackOnboard";
+import StackHome from "./StackHome";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 const Navigation = () => {
-
   const [showOnboard, setShowOnboard] = useState<boolean>(false);
 
   const token = useSelector(selectToken);
+  const anonymous = useSelector(selectanonymous);
   const cart: any = useSelector(selectCartItems);
   const userId = useSelector(selectuserid);
   const dispatch = useDispatch();
 
-
   useEffect(() => {
     (async () => {
       try {
-        const token: any = await AsyncStorage.getItem('token');
-        const userId: any = await AsyncStorage.getItem('userId');
-        dispatch(updateToken(token));
-        dispatch(updateUserId(userId));
+        const token: any = await AsyncStorage.getItem("token");
+        const userId: any = await AsyncStorage.getItem("userId");
+        const anonymoususer: any = await AsyncStorage.getItem("anonymous");
+
+        await dispatch(updateToken(token));
+        await dispatch(updateUserId(userId));
+        await dispatch(anonymousUser(anonymoususer));
       } catch (err) {
         console.log(err);
       }
-    })()
-  }, [])
-
-
-  
+    })();
+  }, []);
 
   console.log(token);
 
   const products = useSelector(selectProducts);
 
-  
+  console.log(anonymous);
+
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        {!token ? (
+        {!token && !anonymous ? (
           <>
+            <Stack.Screen
+              name="home"
+              component={StackHome}
+              options={{ headerShown: false }}
+            />
 
             <Stack.Screen
               name="Onboarding"
@@ -93,76 +106,87 @@ const Navigation = () => {
             />
           </>
         ) : (
-          <>
-            <Stack.Screen name="homeproduct" options={{ headerShown: false }}>
-              {() => (
-                <Tab.Navigator>
-                  <Tab.Screen
-                    name="product"
-                    component={StackProduct}
-                    options={{
-                      headerShown: false,
-                      tabBarIcon: ({ color, size }) => (
-                        <FontAwesome name="home" size={24} color={color} />
-                      ),
-                    }}
-                    listeners={({ navigation }) => ({
-                      tabPress: () => {
-                        navigation.navigate("homeproduct", {
-                          screen: "product",
-                        });
-                        navigation.reset({
-                          index: 0,
-                          routes: [{ name: "homeproduct" }],
-                        });
-                      },
-                    })}
-                  />
+          <Stack.Screen name="homeproduct" options={{ headerShown: false }}>
+            {() => (
+              <Tab.Navigator>
+                <Tab.Screen
+                  name="product"
+                  component={StackProduct}
+                  options={{
+                    headerShown: false,
+                    tabBarIcon: ({ color, size }) => (
+                      <FontAwesome name="home" size={24} color={color} />
+                    ),
+                  }}
+                  listeners={({ navigation }) => ({
+                    tabPress: () => {
+                      navigation.navigate("homeproduct", {
+                        screen: "product",
+                      });
+                      navigation.reset({
+                        index: 0,
+                        routes: [{ name: "homeproduct" }],
+                      });
+                    },
+                  })}
+                />
 
-                  <Tab.Screen
-                    name="Cart"
-                    component={StackCart}
-                    initialParams={products}
-                    options={{
-                      headerShown: false,
-                      tabBarIcon: ({ color, size }) => (
-                        <Icon name="shopping-cart" color={color} size={size} />
-                      ),
-                      tabBarLabel: ({ color }) => (
-                        <View style={styles.tabBarLabel}>
-                          <Text style={{ color }}>Cart</Text>
-                          {cart.items && cart.items.length > 0 && (
-                            <View style={styles.itemCountContainer}>
-                              <Text style={styles.itemCountText}>
-                                {cart.items.length}
-                              </Text>
-                            </View>
-                          )}
-                        </View>
-                      ),
-                    }}
-                    listeners={({ navigation, route }) => ({
-                      tabPress: () => {
-                        navigation.navigate("Cart");
-                      },
-                    })}
-                  />
 
-                  <Tab.Screen
-                    name="History"
-                    component={StackHistory}
-                    initialParams={products}
-                    options={{
-                      headerShown: false,
-                      tabBarIcon: ({ color, size }) => (
-                        <FontAwesome5 name="history" size={24} color="black" />
-                      ),
-                    }}
-                  />
-                </Tab.Navigator>
-              )}
-            </Stack.Screen>
-          </>
+                {token && (
+                  <>
+                    <Tab.Screen
+                      name="Cart"
+                      component={StackCart}
+                      initialParams={products}
+                      options={{
+                        headerShown: false,
+                        tabBarIcon: ({ color, size }) => (
+                          <Icon
+                            name="shopping-cart"
+                            color={color}
+                            size={size}
+                          />
+                        ),
+                        tabBarLabel: ({ color }) => (
+                          <View style={styles.tabBarLabel}>
+                            <Text style={{ color }}>Cart</Text>
+                            {cart.items && cart.items.length > 0 && (
+                              <View style={styles.itemCountContainer}>
+                                <Text style={styles.itemCountText}>
+                                  {cart.items.length}
+                                </Text>
+                              </View>
+                            )}
+                          </View>
+                        ),
+                      }}
+                      listeners={({ navigation, route }) => ({
+                        tabPress: () => {
+                          navigation.navigate("Cart");
+                        },
+                      })}
+                    />
+
+                    <Tab.Screen
+                      name="History"
+                      component={StackHistory}
+                      initialParams={products}
+                      options={{
+                        headerShown: false,
+                        tabBarIcon: ({ color, size }) => (
+                          <FontAwesome5
+                            name="history"
+                            size={24}
+                            color="black"
+                          />
+                        ),
+                      }}
+                    />
+                  </>
+                )}
+              </Tab.Navigator>
+            )}
+          </Stack.Screen>
         )}
       </Stack.Navigator>
     </NavigationContainer>

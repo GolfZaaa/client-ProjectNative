@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { selectEmail, selectToken, selectusername, updateToken } from "./accountSlice";
+import { anonymousUser, selectEmail, selectToken, selectusername, updateToken } from "./accountSlice";
 import { FontAwesome } from '@expo/vector-icons';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -14,22 +14,7 @@ const SettingUser = ({navigation}:any) => {
 
   console.log(email);
 
-
-  const handleLogout = async () => {
-    if (token !== "") {
-      try {
-        await AsyncStorage.removeItem('token');
-        await AsyncStorage.removeItem('userid');
-        dispatch(updateToken(null));
-      } catch (error) {
-        console.log("Error removing token:", error);
-      }
-    }
-  };
   
-  
-  
-
 
   return (
     <View style={styles.container}>
@@ -52,9 +37,7 @@ const SettingUser = ({navigation}:any) => {
         <TouchableOpacity style={styles.button} >
           <Text style={styles.buttonText}>ChangePassword</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={handleLogout}>
-          <Text style={styles.buttonText}>logout</Text>
-        </TouchableOpacity>
+
       </View>
     </View>
   );

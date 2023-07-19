@@ -18,7 +18,7 @@ import {
   updateCart,
 } from "../features/cart/cartSlice";
 import { AnyAction } from "@reduxjs/toolkit";
-import { selectuserid } from "../features/account/accountSlice";
+import { selectToken, selectuserid } from "../features/account/accountSlice";
 import { Entypo } from '@expo/vector-icons';
 import { Fontisto } from '@expo/vector-icons';
 import { AntDesign } from '@expo/vector-icons';
@@ -28,6 +28,7 @@ const StackCart = ({ navigation, route,item }: any) => {
   const dispatch = useDispatch();
   const userId = useSelector(selectuserid);
   const cart: any = useSelector(selectCartItems);
+  const token = useSelector(selectToken);
 
   console.log("😜", cart);
 

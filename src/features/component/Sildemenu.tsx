@@ -7,16 +7,31 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 import { FontAwesome } from '@expo/vector-icons';
 import { useDispatch, useSelector } from "react-redux";
-import { selectusername } from "../account/accountSlice";
+import { anonymousUser, selectEmail, selectToken, selectusername, updateToken, updateUserId } from "../account/accountSlice";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Sildemenu = ({ navigation }: any) => {
   const [open, setOpen] = useState(false);
   const dispatch = useDispatch();
   const username = useSelector(selectusername);
-
+  const token = useSelector(selectToken);
+  const email = useSelector(selectEmail);
 
   const handlesetting = () => {
     setOpen(!open), navigation.navigate("setting");
+  };
+
+  const handleLogout = async () => {
+    if (token !== "") {
+      try {
+        await AsyncStorage.multiRemove(['token', 'userId', 'anonymous']);
+        dispatch(updateToken(null));
+        dispatch(anonymousUser(false));
+        dispatch(updateUserId(null));
+      } catch (error) {
+        console.log("Error removing token:", error);
+      }
+    }
   };
 
   return (
@@ -105,6 +120,7 @@ const Sildemenu = ({ navigation }: any) => {
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
+              onPress={handleLogout}
                 style={{
                   width: "90%",
                   height: 50,

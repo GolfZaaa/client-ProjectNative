@@ -1,42 +1,63 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, Button, ActivityIndicator, Animated, TouchableOpacity,Image, Alert } from 'react-native';
-import { useSelector, useDispatch } from 'react-redux';
-import { loginAsync,selectError, selectIsLoading, selectToken} from './accountSlice';
-import { Toast } from '../component/AlertToast';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  ActivityIndicator,
+  Animated,
+  TouchableOpacity,
+  Image,
+  Alert,
+  StyleSheet
+} from "react-native";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  anonymousUser,
+  anonymousadd,
+  loginAsync,
+  selectError,
+  selectIsLoading,
+  selectToken,
+  selectanonymous,
+} from "./accountSlice";
+import { Toast } from "../component/AlertToast";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const LoginScreen = ({navigation}:any) => {
+const LoginScreen = ({ navigation }: any) => {
   const isLoading = useSelector(selectIsLoading);
   const error = useSelector(selectError);
   const dispatch = useDispatch();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [showingToast, setShowingToast] = useState(false);
+  const anonymous = useSelector(selectanonymous);
+  const token = useSelector(selectToken);
 
-const imagelogo = require('../../../assets/iconlogin.png');
-
-
+  const imagelogo = require("../../../assets/iconlogin.png");
 
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
-  
+
   // const handleLogin = ({navigation}:any) => {
   //   setShowingToast(true);
   //   dispatch(loginAsync({ username, password }) as any)
   // };
 
-
-const handleLogin = ({ navigation }: any) => {
-  setShowingToast(true);
-  dispatch(loginAsync({ username, password }) as any)
-    .then((success: any) => {
+  const handleLogin = ({ navigation }: any) => {
+    setShowingToast(true);
+    dispatch(loginAsync({ username, password }) as any).then((success: any) => {
       if (success) {
         setShowingToast(true);
       } else {
         setShowingToast(false);
       }
     });
-};
+  };
 
-  
+  const handleGuestVisit = () => {
+    dispatch(anonymousadd());
+    AsyncStorage.removeItem("userid");
+  };
 
   React.useEffect(() => {
     // ใช้ Animated.timing เพื่อทำ Animation ให้กับ fadeAnim โดยเปลี่ยนค่า opacity จาก 0 เป็น 1 ในระยะเวลา 1000 milliseconds
@@ -46,8 +67,6 @@ const handleLogin = ({ navigation }: any) => {
       useNativeDriver: true,
     }).start();
   }, [fadeAnim]);
-
-  
 
   return (
     <View
@@ -66,9 +85,16 @@ const handleLogin = ({ navigation }: any) => {
             {error && <Text style={{ color: "red" }}>{error}</Text>}
 
             {showingToast && (
-              <View style={{ position: "absolute",top:-60,zIndex:99,alignContent:'center'}}>
+              <View
+                style={{
+                  position: "absolute",
+                  top: -60,
+                  zIndex: 99,
+                  alignContent: "center",
+                }}
+              >
                 <Toast
-                  title ="Fail to login"
+                  title="Fail to login"
                   message="Login unsuccessful, please try again."
                   duration={2000}
                   onHidden={() => setShowingToast(false)}
@@ -156,21 +182,46 @@ const handleLogin = ({ navigation }: any) => {
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={{ alignItems: "center", marginBottom: 35 }}
-              onPress={() => navigation.navigate("register")}
-            >
-              <Text style={{ fontSize: 15, fontWeight: "800" }}>
-                Create new account
-              </Text>
-            </TouchableOpacity>
-
             <View style={{ alignItems: "center" }}>
               <Text style={{ fontSize: 15, fontWeight: "600" }}>
                 Or continue with
               </Text>
             </View>
-            <Image source={imagelogo} style={{ top: 20, left: 25 }} />
+
+            <View style={styles.socialRow}>
+              <TouchableOpacity
+                style={[styles.socialCard]}
+                onPress={() => console.log("Facebook login")}
+              >
+                <Image
+                  source={require("../../../assets/icons/imageicon/facebook.png")}
+                  style={styles.socialIconfacebook}
+                />
+                <Text style={styles.socialText}>Facebook</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.socialCard]}
+                onPress={handleGuestVisit}
+              >
+                <Image
+                  source={require("../../../assets/icons/imageicon/anonymous.png")}
+                  style={styles.socialIcon}
+                />
+                <Text style={styles.socialText}>Guest </Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={{flexDirection:'row',alignItems:'center',justifyContent:'center',marginTop:50}}>
+              <Text>Don't have an account? </Text>
+              <TouchableOpacity
+                onPress={() => navigation.navigate("register")}
+              >
+                <Text style={{ fontSize: 15, fontWeight: "800",color:'#0464ff' }}>
+                  Register
+                </Text>
+              </TouchableOpacity>
+            </View>
 
             <View
               style={{
@@ -202,3 +253,39 @@ const handleLogin = ({ navigation }: any) => {
 };
 
 export default LoginScreen;
+
+
+
+const styles = StyleSheet.create({
+  socialCard: {
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#f5f5f5",
+    borderRadius: 10,
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    flexDirection: "row",
+    width:140,
+  },
+  socialRow: {
+    flexDirection: "row",
+    marginTop: 20,
+    justifyContent: "space-between",
+  },
+  socialIcon: {
+    width: 30,
+    height: 30,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  socialIconfacebook: {
+    width: 40,
+    height: 30,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  socialText: {
+    fontWeight: "600",
+    fontSize: 14,
+  },
+});

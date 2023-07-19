@@ -12,6 +12,7 @@ interface AccountState {
   error: string | null;
   token: string | null; 
   userid : string;
+  anonymous:any;
 }
 
 const initialState: AccountState = {
@@ -23,6 +24,7 @@ const initialState: AccountState = {
   error: null,
   token: null,
   userid : "",
+  anonymous : null,
 };
 
 export const loginAsync = createAsyncThunk(
@@ -84,6 +86,15 @@ const accountSlice = createSlice({
       state.userid = action.payload;
       AsyncStorage.removeItem('userid');
     },
+    anonymousUser: (state,action) => {
+      state.anonymous = action.payload;
+      AsyncStorage.removeItem('userid');
+      AsyncStorage.removeItem('anonymous');
+    },
+    anonymousadd: (state) => {
+      state.anonymous = true;
+      AsyncStorage.setItem("anonymous", "true"); 
+    },
   },
   
   extraReducers: (builder) => {
@@ -98,8 +109,19 @@ const accountSlice = createSlice({
         state.email = action.payload.email;
         state.token = action.payload.token; 
         state.userid = action.payload.userid;
-        AsyncStorage.setItem('token',action.payload.token)
-        AsyncStorage.setItem('userId',action.payload.userid)
+        state.anonymous = action.payload.anonymous;
+
+        if (action.payload.anonymous) {
+          AsyncStorage.setItem('anonymous', "true");
+        }
+
+        if (action.payload.token) {
+          AsyncStorage.setItem('token', action.payload.token);
+        }
+
+        if (action.payload.userid) {
+          AsyncStorage.setItem('userId', action.payload.userid);
+        }
       })
       .addCase(loginAsync.rejected, (state, action) => {
         state.isLoading = false;
@@ -142,8 +164,9 @@ export const selectToken = (state: RootState) => state.account.token;
 export const selectEmail = (state: RootState) => state.account.email;
 export const selectusername = (state: RootState) => state.account.username;
 export const selectuserid = (state: RootState) => state.account.userid;
+export const selectanonymous = (state: RootState) => state.account.anonymous;
 
 
-export const { updateToken,updateUserId } = accountSlice.actions;
+export const {anonymousadd, updateToken,updateUserId,anonymousUser } = accountSlice.actions;
 
 export default accountSlice.reducer;
