@@ -8,9 +8,12 @@ import RegisterScreen from "../features/account/RegisterScreen";
 import ProducuDetailScreen from "../features/product/ProducuDetailScreen";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  GetAddressUser,
   anonymousUser,
+  removeaddress,
   selectToken,
   selectanonymous,
+  selectstreet,
   selectuserid,
   updateToken,
   updateUserId,
@@ -32,18 +35,24 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import Toast from "../features/component/AlertToast";
 import StackOnboard from "./StackOnboard";
 import StackHome from "./StackHome";
+import checkoutscreen from "../features/checkout/checkoutscreen";
+import address from "../features/account/address";
+import Address from "../features/account/address";
+import StackSetting from "./StackSetting";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 const Navigation = () => {
+  const dispatch = useDispatch();
   const [showOnboard, setShowOnboard] = useState<boolean>(false);
 
   const token = useSelector(selectToken);
   const anonymous = useSelector(selectanonymous);
   const cart: any = useSelector(selectCartItems);
   const userId = useSelector(selectuserid);
-  const dispatch = useDispatch();
+  const addresstest = useSelector(selectstreet);
+  
 
   useEffect(() => {
     (async () => {
@@ -51,7 +60,9 @@ const Navigation = () => {
         const token: any = await AsyncStorage.getItem("token");
         const userId: any = await AsyncStorage.getItem("userId");
         const anonymoususer: any = await AsyncStorage.getItem("anonymous");
-
+  
+        console.log(token);
+  
         await dispatch(updateToken(token));
         await dispatch(updateUserId(userId));
         await dispatch(anonymousUser(anonymoususer));
@@ -60,11 +71,29 @@ const Navigation = () => {
       }
     })();
   }, []);
+  
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        await Promise.all([
+          dispatch(getCartAsync({ userId }) as unknown as AnyAction),
+          dispatch(GetAddressUser({ userId }) as unknown as AnyAction),
+        ]);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    fetchData();
+  }, [userId]);
+  
+
+  
 
   console.log(token);
 
   const products = useSelector(selectProducts);
-
   console.log(anonymous);
 
   return (
@@ -72,12 +101,23 @@ const Navigation = () => {
       <Stack.Navigator>
         {!token && !anonymous ? (
           <>
-            <Stack.Screen
-              name="home"
-              component={StackHome}
+            {/* <Stack.Screen
+              name="testSettings"
+              component={StackSetting}
               options={{ headerShown: false }}
-            />
+            /> */}
 
+            {/* <Stack.Screen
+              name="test"
+              component={address}
+              options={{ headerShown: false }}
+            /> */}
+{/* 
+            <Stack.Screen
+              name="createaddress"
+              component={Address}
+              options={{ headerShown: false }}
+            /> */}
             <Stack.Screen
               name="Onboarding"
               component={StackOnboard}
@@ -118,6 +158,24 @@ const Navigation = () => {
                       <FontAwesome name="home" size={24} color={color} />
                     ),
                   }}
+                  // listeners={({ navigation }) => ({
+                  //   tabPress: () => {
+                  //     navigation.navigate("homeproduct", {
+                  //       screen: "product",
+                  //     });
+                  //   },
+                  // })}
+                />
+
+                {/* <Tab.Screen
+                  name="Createaddress"
+                  component={address}
+                  options={{
+                    headerShown: false,
+                    tabBarIcon: ({ color, size }) => (
+                      <FontAwesome name="home" size={24} color={color} />
+                    ),
+                  }}
                   listeners={({ navigation }) => ({
                     tabPress: () => {
                       navigation.navigate("homeproduct", {
@@ -129,27 +187,22 @@ const Navigation = () => {
                       });
                     },
                   })}
-                />
+                /> */}
 
-
-                {token && (
-                  <>
-                    <Tab.Screen
-                      name="Cart"
-                      component={StackCart}
-                      initialParams={products}
-                      options={{
-                        headerShown: false,
-                        tabBarIcon: ({ color, size }) => (
-                          <Icon
-                            name="shopping-cart"
-                            color={color}
-                            size={size}
-                          />
-                        ),
-                        tabBarLabel: ({ color }) => (
-                          <View style={styles.tabBarLabel}>
-                            <Text style={{ color }}>Cart</Text>
+                <Tab.Screen
+                  name="Cart"
+                  component={StackCart}
+                  initialParams={products}
+                  options={{
+                    headerShown: false,
+                    tabBarIcon: ({ color, size }) => (
+                      <Icon name="shopping-cart" color={color} size={size} />
+                    ),
+                    tabBarLabel: ({ color }) => (
+                      <View style={styles.tabBarLabel}>
+                        <Text style={{ color }}>Cart</Text>
+                        {token && (
+                          <View>
                             {cart.items && cart.items.length > 0 && (
                               <View style={styles.itemCountContainer}>
                                 <Text style={styles.itemCountText}>
@@ -158,18 +211,37 @@ const Navigation = () => {
                               </View>
                             )}
                           </View>
-                        ),
-                      }}
-                      listeners={({ navigation, route }) => ({
-                        tabPress: () => {
-                          navigation.navigate("Cart");
-                        },
-                      })}
-                    />
+                        )}
+                      </View>
+                    ),
+                  }}
+                  // listeners={({ navigation, route }) => ({
+                  //   tabPress: () => {
+                  //     navigation.navigate("Cart");
+                  //   },
+                  // })}
+                />
 
-                    <Tab.Screen
+                {token && (
+                  <>
+                    {/* <Tab.Screen
                       name="History"
                       component={StackHistory}
+                      initialParams={products}
+                      options={{
+                        headerShown: false,
+                        tabBarIcon: ({ color, size }) => (
+                          <FontAwesome5
+                            name="history"
+                            size={24}
+                            color="black"
+                          />
+                        ),
+                      }}
+                    /> */}
+                     <Tab.Screen
+                      name="Setting"
+                      component={StackSetting}
                       initialParams={products}
                       options={{
                         headerShown: false,
@@ -208,11 +280,11 @@ const styles = StyleSheet.create({
   itemCountContainer: {
     backgroundColor: "red",
     borderRadius: 10,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
+    paddingHorizontal: 5,
+    paddingVertical: 1,
     position: "absolute",
-    top: -30,
-    right: -15,
+    top: -50,
+    right: -25,
   },
   itemCountText: {
     color: "white",

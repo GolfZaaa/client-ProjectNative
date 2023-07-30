@@ -5,6 +5,8 @@ import ProductScreen from "../features/product/ProductScreen";
 import HomeScreen from "../screens/HomeScreen";
 import ProducuDetailScreen from "../features/product/ProducuDetailScreen";
 import SettingUser from "../features/account/SettingUser";
+import Address from "../features/account/address";
+import OrderScreen from "../features/checkout/OrderScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -24,6 +26,16 @@ const StackProduct = () => {
       <Stack.Screen
         name="setting"
         component={SettingUser}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="createaddress"
+        component={Address}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="orders"
+        component={OrderScreen}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

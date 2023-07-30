@@ -1,23 +1,30 @@
 import { StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native';
 import React from 'react';
+import Sildemenu from '../features/component/Sildemenu';
+import { FontAwesome5 } from '@expo/vector-icons';
 
-const StackHome = () => {
+const StackHome = ({navigation}:any) => {
 
     const background = require('../../assets/background/home.png');
 
-    const backgroundfood = require('../../assets/background/food.png');
+    const backgroundfood = require('../../assets/background/food2.png');
 
   return (
     <View style={styles.container}>
+
+    <Sildemenu navigation={navigation} />
+
       <View style={styles.card}>
       <Image source={background} style={styles.cardBackground} />
+      <View style={styles.imageOverlay} />
         <Text style={styles.title}>Get special discount</Text>
         <Text style={styles.discount}>up to 85%</Text>
         <TouchableOpacity style={styles.button}>
           <Text style={styles.buttonText}>Claim Voucher</Text>
         </TouchableOpacity>
-        <Image source={backgroundfood} style={{position: 'absolute', resizeMode: 'contain', width: 320, height: 320,left:120,top:30}} />
+        <Image source={backgroundfood} style={styles.imagefood} />
       </View>
+
     </View>
   );
 };
@@ -25,8 +32,15 @@ const StackHome = () => {
 const styles = StyleSheet.create({
     container: {
       flex: 1,
-      alignItems: 'center',
       backgroundColor: '#ffffff',
+    },
+    imagefood:{
+        position: 'absolute',
+        resizeMode: 'contain',
+        width: 320,
+        height: 320,
+        left:160,
+        top:25
     },
     card: {
       backgroundColor: '#fff',
@@ -45,6 +59,15 @@ const styles = StyleSheet.create({
       position: 'relative', 
       overflow: 'hidden', 
     },
+    imageOverlay: { 
+    position: 'absolute',
+    top: 110,
+    left: 145,
+    width: 300,
+    height: 300,
+    borderRadius:130,
+    backgroundColor: 'rgba(255, 255, 255, 0.4)', 
+},
     cardBackground: {
       position: 'absolute', 
       top: 0,

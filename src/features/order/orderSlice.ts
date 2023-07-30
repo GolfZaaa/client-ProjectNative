@@ -11,6 +11,7 @@ interface CartState {
   userId : string;
   totalAmount : number;
   order:[]
+  address:any
 }
 
 const initialState: CartState = {
@@ -18,7 +19,8 @@ const initialState: CartState = {
   error: null,
   userId: '',
   totalAmount: 0,
-  order: []
+  order: [],
+  address:""
 };
 
 

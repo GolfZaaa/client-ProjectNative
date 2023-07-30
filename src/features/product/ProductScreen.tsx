@@ -62,7 +62,7 @@ const ProductScreen = ({ navigation }: any) => {
 
   //แสดลงข้อมูล Type Start
   const type = useSelector(selectType);
-  const [selectedType, setSelectedType] = useState(null); // กำหนดชนิดข้อมูลเป็น any หรือ null
+  const [selectedType, setSelectedType] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -80,7 +80,7 @@ const ProductScreen = ({ navigation }: any) => {
       const filteredProducts = products.filter((product) => {
         return (
           product.name.toLowerCase().includes(searchText.toLowerCase()) &&
-          (selectedType ? product.type === selectedType : true) // เพิ่มเงื่อนไขในการกรองสินค้าด้วย Type ที่ถูกเลือก
+          (selectedType ? product.type === selectedType : true) // เพิ่มเงื่อนไขในการกรองสินค้าด้วย Type ที่ถูกเลือก ********
         );
       });
       setFilteredProducts(filteredProducts);

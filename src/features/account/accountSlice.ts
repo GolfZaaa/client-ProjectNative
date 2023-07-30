@@ -3,6 +3,13 @@ import { RootState } from "../../api/store";
 import agent from "../../api/agent";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+interface address {
+  province: string;
+  district: string;
+  subdistrict: string;
+  postalcode:string;
+}
+
 interface AccountState {
   email: string;
   role: string;
@@ -13,6 +20,7 @@ interface AccountState {
   token: string | null; 
   userid : string;
   anonymous:any;
+  address:address[];
 }
 
 const initialState: AccountState = {
@@ -25,6 +33,7 @@ const initialState: AccountState = {
   token: null,
   userid : "",
   anonymous : null,
+  address: [],
 };
 
 export const loginAsync = createAsyncThunk(
@@ -73,6 +82,39 @@ export const confirmUserAsync = createAsyncThunk(
   }
 );
 
+export const createaddress = createAsyncThunk(
+  "Authentication/CreateAddress",
+  async ({ province, district,subdistrict,postalCode,userId }: { province: string; district: string,subdistrict:string,postalCode:string,userId:string }) => {
+    try {
+      const response = await agent.Account.createaddress({ province, district,subdistrict,postalCode,userId });
+      console.log(response);
+      return response;
+    } catch (error) {
+      console.log("😂😂", error);
+      throw error;
+    }
+  }
+);
+
+export const GetAddressUser = createAsyncThunk(
+  "Authentication/PostUserAddress",
+  async ({
+    userId,
+  }: {
+    userId: string;
+  }) => {
+    try {
+      const response = await agent.Account.getaddress({
+        userId,
+      });
+      console.log(response);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+);
+
 const accountSlice = createSlice({
   name: "users",
   initialState,
@@ -95,6 +137,12 @@ const accountSlice = createSlice({
       state.anonymous = true;
       AsyncStorage.setItem("anonymous", "true"); 
     },
+    test :(state, action) => {
+      console.log("payload", action.payload);
+    },
+    removeaddress :(state, action) => {
+      state.address = [];
+    }
   },
   
   extraReducers: (builder) => {
@@ -154,7 +202,40 @@ const accountSlice = createSlice({
       .addCase(confirmUserAsync.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.error.message || "Failed to confirm users.";
-      });
+      })
+
+
+
+      .addCase(createaddress.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(createaddress.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.address = action.payload;
+        console.log("Successfully create Address");
+      })
+      .addCase(createaddress.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || "Failed to confirm users.";
+      })
+
+      .addCase(GetAddressUser.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+
+      .addCase(GetAddressUser.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.address = action.payload;
+        
+        console.log("Successfully create Address");
+      })
+      .addCase(GetAddressUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || "Failed to confirm users.";
+      })
+
   },
 });
 
@@ -165,8 +246,10 @@ export const selectEmail = (state: RootState) => state.account.email;
 export const selectusername = (state: RootState) => state.account.username;
 export const selectuserid = (state: RootState) => state.account.userid;
 export const selectanonymous = (state: RootState) => state.account.anonymous;
+export const selectstreet = (state: RootState) => state.account.address;
 
 
-export const {anonymousadd, updateToken,updateUserId,anonymousUser } = accountSlice.actions;
+
+export const {removeaddress,anonymousadd, test,updateToken,updateUserId,anonymousUser } = accountSlice.actions;
 
 export default accountSlice.reducer;

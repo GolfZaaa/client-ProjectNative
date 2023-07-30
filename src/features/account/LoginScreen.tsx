@@ -82,8 +82,6 @@ const LoginScreen = ({ navigation }: any) => {
           <ActivityIndicator size="large" color="blue" />
         ) : (
           <>
-            {error && <Text style={{ color: "red" }}>{error}</Text>}
-
             {showingToast && (
               <View
                 style={{

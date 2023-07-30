@@ -10,7 +10,12 @@ import {
 } from "react-native";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { anonymousadd, registerAsync, selectError, selectIsLoading } from "./accountSlice";
+import {
+  anonymousadd,
+  registerAsync,
+  selectError,
+  selectIsLoading,
+} from "./accountSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const RegisterScreen = ({ navigation }: any) => {
@@ -21,111 +26,196 @@ const RegisterScreen = ({ navigation }: any) => {
 
   const isLoading = useSelector(selectIsLoading);
   const error = useSelector(selectError);
-  const imagelogo = require('../../../assets/iconlogin.png');
+  const imagelogo = require("../../../assets/iconlogin.png");
   const dispatch = useDispatch();
 
   const handleregister = async () => {
-    if (email === '' || role === '' || username === '' || password === '') {
+    if (email === "" || role === "" || username === "" || password === "") {
       // หากมีค่าว่างในอย่างใดอย่างหนึ่ง ไม่ทำอะไรและออกจากฟังก์ชัน
       return;
     }
-  
-    await dispatch(registerAsync({ email, role, username, password }) as any)
-      .then(() => {
-        navigation.navigate("confirmemail", {email});
-      });
+
+    await dispatch(
+      registerAsync({ email, role, username, password }) as any
+    ).then(() => {
+      navigation.navigate("confirmemail", { email });
+    });
   };
 
   const handleGuestVisit = () => {
     dispatch(anonymousadd());
     AsyncStorage.removeItem("userid");
   };
-  
 
   return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center",backgroundColor:'#fff' }}>
+    <View
+      style={{
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "#fff",
+      }}
+    >
       {isLoading ? (
         <ActivityIndicator size="large" color="blue" />
       ) : (
         <>
           {error && <Text style={{ color: "red" }}>{error}</Text>}
-          <Text style={{fontSize:40,fontWeight:'800',color:'#1c68f7',textAlign:'center',marginBottom:50}}>Register</Text>
+          <Text
+            style={{
+              fontSize: 40,
+              fontWeight: "800",
+              color: "#1c68f7",
+              textAlign: "center",
+              marginBottom: 50,
+            }}
+          >
+            Register
+          </Text>
           <TextInput
-              placeholder="Email"
-              value={email}
-              onChangeText={setEmail}
-              style={{ paddingHorizontal:30,fontSize:15,fontWeight:'500',width: 330, height: 60, marginBottom: 15,backgroundColor:'#b2d1fd',borderRadius:15 }}
-            />
+            placeholder="Email"
+            value={email}
+            onChangeText={setEmail}
+            style={{
+              paddingHorizontal: 30,
+              fontSize: 15,
+              fontWeight: "500",
+              width: 330,
+              height: 60,
+              marginBottom: 15,
+              backgroundColor: "#b2d1fd",
+              borderRadius: 15,
+            }}
+          />
+          <TextInput
+            placeholder="Username"
+            value={username}
+            onChangeText={setUsername}
+            style={{
+              paddingHorizontal: 30,
+              fontSize: 15,
+              fontWeight: "500",
+              width: 330,
+              height: 60,
+              marginBottom: 15,
+              backgroundColor: "#b2d1fd",
+              borderRadius: 15,
+              marginTop: 15,
+            }}
+          />
 
-            <TextInput
-              placeholder="Username"
-              value={username}
-              onChangeText={setUsername}
-              style={{paddingHorizontal:30,fontSize:15,fontWeight:'500', width: 330, height: 60, marginBottom: 15,backgroundColor:'#b2d1fd',borderRadius:15,marginTop:15}}
-            />
+          <TextInput
+            placeholder="Password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            style={{
+              paddingHorizontal: 30,
+              fontSize: 15,
+              fontWeight: "500",
+              width: 330,
+              height: 60,
+              marginBottom: 15,
+              backgroundColor: "#b2d1fd",
+              borderRadius: 15,
+              marginTop: 15,
+            }}
+          />
 
-              <TextInput
-              placeholder="Password"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              style={{paddingHorizontal:30,fontSize:15,fontWeight:'500', width: 330, height: 60, marginBottom: 15,backgroundColor:'#b2d1fd',borderRadius:15,marginTop:15}}
-            />
+          <TouchableOpacity
+            onPress={handleregister}
+            style={{
+              width: 330,
+              backgroundColor: "#1a57ff",
+              marginBottom: 20,
+              height: 60,
+              marginTop: 30,
+              borderRadius: 10,
+              alignItems: "center",
+            }}
+          >
+            <Text
+              style={{
+                color: "#fff",
+                fontSize: 25,
+                fontWeight: "600",
+                top: 15,
+              }}
+            >
+              Register
+            </Text>
+          </TouchableOpacity>
 
+          <View style={{ alignItems: "center" }}>
+            <Text style={{ fontSize: 15, fontWeight: "600" }}>
+              Or continue with
+            </Text>
+          </View>
 
-          <TouchableOpacity onPress={handleregister} style={{width:330,backgroundColor:'#1a57ff',marginBottom:20,height:60,marginTop:30,borderRadius:10,alignItems:'center'}}>
-                <Text style={{color:'#fff',fontSize:25,fontWeight:'600',top:15}}>Register</Text>
+          <View style={styles.socialRow}>
+            <TouchableOpacity
+              style={[styles.socialCard]}
+              onPress={() => console.log("Facebook login")}
+            >
+              <Image
+                source={require("../../../assets/icons/imageicon/facebook.png")}
+                style={styles.socialIconfacebook}
+              />
+              <Text style={styles.socialText}>Facebook</Text>
             </TouchableOpacity>
 
-            
-            <View style={{ alignItems: "center" }}>
-              <Text style={{ fontSize: 15, fontWeight: "600" }}>
-                Or continue with
-              </Text>
-            </View>
+            <TouchableOpacity
+              style={[styles.socialCard]}
+              onPress={handleGuestVisit}
+            >
+              <Image
+                source={require("../../../assets/icons/imageicon/anonymous.png")}
+                style={styles.socialIcon}
+              />
+              <Text style={styles.socialText}>Guest </Text>
+            </TouchableOpacity>
+          </View>
 
-
-            <View style={styles.socialRow}>
-              <TouchableOpacity
-                style={[styles.socialCard]}
-                onPress={() => console.log("Facebook login")}
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              marginTop: 50,
+            }}
+          >
+            <Text>Already Have An Account? </Text>
+            <TouchableOpacity onPress={() => navigation.navigate("login")}>
+              <Text
+                style={{ fontSize: 15, fontWeight: "800", color: "#0464ff" }}
               >
-                <Image
-                  source={require("../../../assets/icons/imageicon/facebook.png")}
-                  style={styles.socialIconfacebook}
-                />
-                <Text style={styles.socialText}>Facebook</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.socialCard]}
-                onPress={handleGuestVisit}
-              >
-                <Image
-                  source={require("../../../assets/icons/imageicon/anonymous.png")}
-                  style={styles.socialIcon}
-                />
-                <Text style={styles.socialText}>Guest </Text>
-              </TouchableOpacity>
-            </View>
-
-
-           <View style={{flexDirection:'row',alignItems:'center',justifyContent:'center',marginTop:50}}>
-              <Text>Already Have An Account?  </Text>
-              <TouchableOpacity
-                onPress={() => navigation.navigate("login")}
-              >
-                <Text style={{ fontSize: 15, fontWeight: "800",color:'#0464ff' }}>
                 login
-                </Text>
-              </TouchableOpacity>
-            </View>
+              </Text>
+            </TouchableOpacity>
+          </View>
 
-
-           <View style={{top:720,right:-140,width:300,height:300,position:'absolute',backgroundColor:'#5ee1ff',borderRadius:140}}>
-           </View>
-           <View style={{bottom:710,right:210,width:300,height:300,position:'absolute',backgroundColor:'#5ee1ff',borderRadius:140}}>
-           </View>
+          <View
+            style={{
+              top: 720,
+              right: -140,
+              width: 300,
+              height: 300,
+              position: "absolute",
+              backgroundColor: "#5ee1ff",
+              borderRadius: 140,
+            }}
+          ></View>
+          <View
+            style={{
+              bottom: 710,
+              right: 210,
+              width: 300,
+              height: 300,
+              position: "absolute",
+              backgroundColor: "#5ee1ff",
+              borderRadius: 140,
+            }}
+          ></View>
         </>
       )}
     </View>
@@ -198,7 +288,7 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     paddingHorizontal: 20,
     flexDirection: "row",
-    width:140,
+    width: 140,
   },
   socialRow: {
     flexDirection: "row",
