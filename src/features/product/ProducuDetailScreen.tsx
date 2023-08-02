@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { selectProducts } from "./productSlice";
 import { Ionicons } from '@expo/vector-icons';
-import { selectuserid } from "../account/accountSlice";
+import { selectuserid, selectusername } from "../account/accountSlice";
 import { addProductAsync, getCartAsync, selectCartItems } from "../cart/cartSlice";
 import { AnyAction } from "@reduxjs/toolkit";
 
@@ -16,7 +16,9 @@ const ProductDetailScreen = ({ navigation, route }: any) => {
   const products = useSelector(selectProducts);
 
   const userId = useSelector(selectuserid);
+  const username = useSelector(selectusername);
   console.log(userId);
+
 
 
 

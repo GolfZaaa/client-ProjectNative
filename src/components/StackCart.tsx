@@ -93,7 +93,7 @@ const StackCart = ({ navigation, route, item }: any) => {
   const handleLogout = async () => {
     if (token !== "") {
       try {
-        await AsyncStorage.multiRemove(["token", "userId", "anonymous"]);
+        await AsyncStorage.multiRemove(["token", "userId", "anonymous,username"]);
         dispatch(updateToken(null));
         dispatch(anonymousUser(false));
         dispatch(updateUserId(null));
@@ -224,7 +224,7 @@ const StackCart = ({ navigation, route, item }: any) => {
 
       {!!token ? (
         <View>
-          {cart.items ? (
+          {!!cart.items && cart.items.length > 0 ? (
             <View style={styles.cartCradTotal}>
               <Text style={{ fontSize: 20, fontWeight: "600", marginLeft: 10 }}>
                 Total Price
@@ -243,16 +243,17 @@ const StackCart = ({ navigation, route, item }: any) => {
               </View>
 
               {addressuser.length === 0 ? (
-                <View style={{ marginTop: 40 }}>
+                <View style={{ marginTop: 40,position:'absolute' }}>
                   <TouchableOpacity
                     style={{
                       width: 330,
                       backgroundColor: "#ff8f1f",
-                      marginBottom: -130,
+                      top:100,
                       height: 60,
                       borderRadius: 30,
                       alignItems: "center",
                       justifyContent: "center",
+                      left:10
                     }}
                     onPress={toggleModal}
                   >
@@ -280,7 +281,7 @@ const StackCart = ({ navigation, route, item }: any) => {
                   </View>
                 </View>
               ) : (
-                <View>
+                <View style={{position:'absolute',}}>
                   <TouchableOpacity
                     style={{
                       width: 330,
@@ -290,6 +291,8 @@ const StackCart = ({ navigation, route, item }: any) => {
                       borderRadius: 30,
                       alignItems: "center",
                       justifyContent: "center",
+                      top:75,
+                      left:10
                     }}
                     onPress={CreateOrder}
                   >
@@ -328,7 +331,6 @@ const StackCart = ({ navigation, route, item }: any) => {
               loop
             />
           </View>
-
           <TouchableOpacity
             style={{
               width: 330,

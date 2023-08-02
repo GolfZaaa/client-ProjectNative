@@ -32,7 +32,6 @@ const ProductScreen = ({ navigation }: any) => {
 
   //ฟังก์ชั่น Select Product Start
   const products = useSelector(selectProducts);
-  console.log(products)
 
   const [searchText, setSearchText] = useState("");
   const [filteredProducts, setFilteredProducts] = useState<any[]>(products);

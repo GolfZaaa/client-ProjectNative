@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../../api/store";
 import agent from "../../api/agent";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Alert } from "react-native";
 
 interface address {
   province: string;
@@ -21,6 +22,10 @@ interface AccountState {
   userid : string;
   anonymous:any;
   address:address[];
+  newUserName: string;
+  name : string;
+  newEmail : string;
+  
 }
 
 const initialState: AccountState = {
@@ -34,6 +39,9 @@ const initialState: AccountState = {
   userid : "",
   anonymous : null,
   address: [],
+  newUserName: "",
+  name : "",
+  newEmail : "",
 };
 
 export const loginAsync = createAsyncThunk(
@@ -63,7 +71,6 @@ export const registerAsync = createAsyncThunk(
       username,
       password,
     });
-    console.log(response);
     return response;
   }
 );
@@ -73,10 +80,8 @@ export const confirmUserAsync = createAsyncThunk(
   async ({ email, emailConfirmationToken }: { email: string; emailConfirmationToken: string }) => {
     try {
       const response = await agent.Account.confirm({ email, emailConfirmationToken });
-      console.log(response);
       return response;
     } catch (error) {
-      console.log("😂😂", error);
       throw error;
     }
   }
@@ -87,10 +92,8 @@ export const createaddress = createAsyncThunk(
   async ({ province, district,subdistrict,postalCode,userId }: { province: string; district: string,subdistrict:string,postalCode:string,userId:string }) => {
     try {
       const response = await agent.Account.createaddress({ province, district,subdistrict,postalCode,userId });
-      console.log(response);
       return response;
     } catch (error) {
-      console.log("😂😂", error);
       throw error;
     }
   }
@@ -98,18 +101,67 @@ export const createaddress = createAsyncThunk(
 
 export const GetAddressUser = createAsyncThunk(
   "Authentication/PostUserAddress",
-  async ({
-    userId,
-  }: {
-    userId: string;
-  }) => {
+  async ({userId,}: {userId: string;}) => {
     try {
       const response = await agent.Account.getaddress({
         userId,
       });
-      console.log(response);
       return response;
     } catch (error) {
+      throw error;
+    }
+  }
+);
+
+export const GetDetailUserById = createAsyncThunk(
+  "Authentication/GetSingleUser",
+  async ({username,}: {username: string;}) => {
+    try {
+      const response = await agent.Account.getSingleUser({username,});
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+);
+
+export const ChangeNameUser = createAsyncThunk("Authentication/ChangeUserName",
+  async ({userId,username,newUserName
+  }: {userId: string,username: string,newUserName:string;}) => {
+    try {
+      const response = await agent.Account.changeusername({
+        userId,username,newUserName
+      });
+
+      AsyncStorage.removeItem('username');
+      AsyncStorage.setItem("username" , newUserName); 
+      ////อันนี้ควรจำ
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+);
+
+
+export const ChangeEmailUser = createAsyncThunk(
+  "Authentication/ChangeEmail",
+  async ({ userId, email, newEmail }: { userId: string; email: string; newEmail: string }) => {
+    try {
+      const response = await agent.Account.changeemail({
+        userId,
+        email,
+        newEmail,
+      });
+      
+      console.log("💖",response.email);
+      AsyncStorage.removeItem("email");
+      AsyncStorage.setItem("email", newEmail);
+      ////อันนี้ควรจำ
+      return response;
+    } catch (error) {
+      // Alert.alert("Error", "An error occurred while changing email.");
+      console.log(error)
       throw error;
     }
   }
@@ -121,12 +173,15 @@ const accountSlice = createSlice({
   reducers: {
     updateToken: (state, action) => {
       state.token = action.payload;
-      state.email = action.payload;
-      AsyncStorage.removeItem('token');
+    },
+    updateusername: (state, action) => {
+      state.username = action.payload;
     },
     updateUserId: (state, action) => {
       state.userid = action.payload;
-      AsyncStorage.removeItem('userid');
+    },
+    updateEmail: (state, action) => {
+      state.email = action.payload;
     },
     anonymousUser: (state,action) => {
       state.anonymous = action.payload;
@@ -142,6 +197,9 @@ const accountSlice = createSlice({
     },
     removeaddress :(state, action) => {
       state.address = [];
+    },
+    changename:(state,action) => {
+      state.username = action.payload;
     }
   },
   
@@ -170,6 +228,11 @@ const accountSlice = createSlice({
         if (action.payload.userid) {
           AsyncStorage.setItem('userId', action.payload.userid);
         }
+
+          AsyncStorage.setItem('username', action.payload.username);
+
+          AsyncStorage.setItem('email', action.payload.email);
+
       })
       .addCase(loginAsync.rejected, (state, action) => {
         state.isLoading = false;
@@ -183,7 +246,6 @@ const accountSlice = createSlice({
       })
       .addCase(registerAsync.fulfilled, (state, action) => {
         state.isLoading = false;
-        console.log("Successfully registered");
       })
       .addCase(registerAsync.rejected, (state, action) => {
         state.isLoading = false;
@@ -196,8 +258,6 @@ const accountSlice = createSlice({
       })
       .addCase(confirmUserAsync.fulfilled, (state, action) => {
         state.isLoading = false;
-
-        console.log("Successfully confirmed user");
       })
       .addCase(confirmUserAsync.rejected, (state, action) => {
         state.isLoading = false;
@@ -213,7 +273,6 @@ const accountSlice = createSlice({
       .addCase(createaddress.fulfilled, (state, action) => {
         state.isLoading = false;
         state.address = action.payload;
-        console.log("Successfully create Address");
       })
       .addCase(createaddress.rejected, (state, action) => {
         state.isLoading = false;
@@ -228,13 +287,55 @@ const accountSlice = createSlice({
       .addCase(GetAddressUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.address = action.payload;
-        
-        console.log("Successfully create Address");
       })
       .addCase(GetAddressUser.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.error.message || "Failed to confirm users.";
       })
+
+
+
+      .addCase(ChangeNameUser.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(ChangeNameUser.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.username = action.payload.username;
+        state.newUserName = "";
+      })
+      .addCase(ChangeNameUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || "Failed to Change name users.";
+      })
+
+      .addCase(ChangeEmailUser.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(ChangeEmailUser.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.email = action.payload.email;
+        state.newEmail = "";
+      })
+      .addCase(ChangeEmailUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || "Failed to Change Email users.";
+      })
+
+
+      .addCase(GetDetailUserById.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(GetDetailUserById.fulfilled, (state, action) => {
+        state.isLoading = false;
+      })
+      .addCase(GetDetailUserById.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || "Failed to confirm users.";
+      })
+
 
   },
 });
@@ -247,9 +348,9 @@ export const selectusername = (state: RootState) => state.account.username;
 export const selectuserid = (state: RootState) => state.account.userid;
 export const selectanonymous = (state: RootState) => state.account.anonymous;
 export const selectstreet = (state: RootState) => state.account.address;
+export const selectChangeUsername = (state: RootState) => state.account.newUserName;
 
 
-
-export const {removeaddress,anonymousadd, test,updateToken,updateUserId,anonymousUser } = accountSlice.actions;
+export const {updateEmail,updateusername,changename,removeaddress,anonymousadd, test,updateToken,updateUserId,anonymousUser } = accountSlice.actions;
 
 export default accountSlice.reducer;

@@ -11,6 +11,7 @@ import { selectCartItems, updateCart } from "../cart/cartSlice";
 import { CreateOrderUser } from "../order/orderSlice";
 import { GetAddressUser, selectuserid } from "../account/accountSlice";
 import Lottie from "lottie-react-native";
+import { AnyAction } from "@reduxjs/toolkit";
 
 const OrderScreen = ({navigation}:any) => {
   const dispatch = useDispatch();

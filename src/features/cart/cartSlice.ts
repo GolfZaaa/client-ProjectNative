@@ -140,7 +140,6 @@ const cartSlice = createSlice({
       .addCase(getCartAsync.fulfilled, (state, action) => {
         state.isLoading = false;
         state.carts = action.payload;
-        console.log("😘", state.carts);
       })
       .addCase(getCartAsync.rejected, (state, action) => {
         state.isLoading = false;

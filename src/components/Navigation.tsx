@@ -9,14 +9,19 @@ import ProducuDetailScreen from "../features/product/ProducuDetailScreen";
 import { useDispatch, useSelector } from "react-redux";
 import {
   GetAddressUser,
+  GetDetailUserById,
   anonymousUser,
   removeaddress,
+  selectEmail,
   selectToken,
   selectanonymous,
   selectstreet,
   selectuserid,
+  selectusername,
+  updateEmail,
   updateToken,
   updateUserId,
+  updateusername,
 } from "../features/account/accountSlice";
 import ConfirmEmailUser from "../features/account/ConfirmEmailUser";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -52,6 +57,8 @@ const Navigation = () => {
   const cart: any = useSelector(selectCartItems);
   const userId = useSelector(selectuserid);
   const addresstest = useSelector(selectstreet);
+  const username = useSelector(selectusername);
+  const email = useSelector(selectEmail);
   
 
   useEffect(() => {
@@ -60,14 +67,15 @@ const Navigation = () => {
         const token: any = await AsyncStorage.getItem("token");
         const userId: any = await AsyncStorage.getItem("userId");
         const anonymoususer: any = await AsyncStorage.getItem("anonymous");
-  
-        console.log(token);
+        const username: any = await AsyncStorage.getItem("username");
+        const email: any = await AsyncStorage.getItem("email");
   
         await dispatch(updateToken(token));
         await dispatch(updateUserId(userId));
         await dispatch(anonymousUser(anonymoususer));
+        await dispatch(updateusername(username));
+        await dispatch(updateEmail(email));
       } catch (err) {
-        console.log(err);
       }
     })();
   }, []);
@@ -79,22 +87,21 @@ const Navigation = () => {
         await Promise.all([
           dispatch(getCartAsync({ userId }) as unknown as AnyAction),
           dispatch(GetAddressUser({ userId }) as unknown as AnyAction),
+          dispatch(GetDetailUserById({ username: username }) as any),
         ]);
       } catch (err) {
-        console.log(err);
       }
     };
 
     fetchData();
-  }, [userId]);
+  }, [userId,username]);
   
 
-  
+  console.log(username)
+  console.log(email)
 
-  console.log(token);
 
   const products = useSelector(selectProducts);
-  console.log(anonymous);
 
   return (
     <NavigationContainer>
@@ -239,21 +246,16 @@ const Navigation = () => {
                         ),
                       }}
                     /> */}
-                     <Tab.Screen
-                      name="Setting"
-                      component={StackSetting}
-                      initialParams={products}
-                      options={{
-                        headerShown: false,
-                        tabBarIcon: ({ color, size }) => (
-                          <FontAwesome5
-                            name="history"
-                            size={24}
-                            color="black"
-                          />
-                        ),
-                      }}
-                    />
+                    <Tab.Screen
+        name="Setting"
+        component={StackSetting}
+        options={{
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => (
+            <FontAwesome5 name="cog" size={24} color={color} />
+          ),
+        }}
+      />
                   </>
                 )}
               </Tab.Navigator>

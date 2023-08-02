@@ -17,9 +17,11 @@ import {
   test,
   updateToken,
   updateUserId,
+  updateusername,
 } from "../account/accountSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { FontAwesome5 } from "@expo/vector-icons";
+import { updateCart } from "../cart/cartSlice";
 
 const Sildemenu = ({ navigation }: any) => {
   const [open, setOpen] = useState(false);
@@ -40,11 +42,13 @@ const Sildemenu = ({ navigation }: any) => {
   const handleLogout = async () => {
     if (token !== "") {
       try {
-        await AsyncStorage.multiRemove(["token", "userId", "anonymous"]);
+        await AsyncStorage.multiRemove(["token", "userId", "anonymous","username"]);
         dispatch(updateToken(null));
         dispatch(anonymousUser(false));
         dispatch(updateUserId(null));
         dispatch(removeaddress(null));
+        dispatch(updateusername(null));
+        dispatch(updateCart(null));
       } catch (error) {
         console.log("Error removing token:", error);
       }
