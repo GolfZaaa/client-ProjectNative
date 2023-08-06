@@ -1,52 +1,60 @@
 import React, { useState, useRef } from "react";
-import { StyleSheet, Text, View, TouchableOpacity, TextInput } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  TextInput,
+  Dimensions,
+} from "react-native";
 import { confirmUserAsync } from "./accountSlice";
 import { useDispatch } from "react-redux";
+import { Ionicons } from "@expo/vector-icons";
+import Lottie from 'lottie-react-native';
 
-const ConfirmEmailUser = ({ route, navigation }:any) => {
+
+const ConfirmEmailUser = ({ route, navigation }: any) => {
   const { email } = route.params;
   const [otp1, setOtp1] = useState("");
   const [otp2, setOtp2] = useState("");
   const [otp3, setOtp3] = useState("");
   const [otp4, setOtp4] = useState("");
   const dispatch = useDispatch();
-  
+
   const inputRefs = [
     useRef<TextInput>(null),
     useRef<TextInput>(null),
     useRef<TextInput>(null),
     useRef<TextInput>(null),
   ];
-  
 
-  const handleOTPChange = (text:any, index:any) => {
-    switch (index) {
-      case 0:
-        setOtp1(text);
-        if (text && text.length === 1 && inputRefs[1].current) {
-          inputRefs[1].current.focus();
-        }
-        break;
-      case 1:
-        setOtp2(text);
-        if (text && text.length === 1 && inputRefs[2].current) {
-          inputRefs[2].current.focus();
-        }
-        break;
-      case 2:
-        setOtp3(text);
-        if (text && text.length === 1 && inputRefs[3].current) {
-          inputRefs[3].current.focus();
-        }
-        break;
-      case 3:
-        setOtp4(text);
-        break;
-      default:
-        break;
+  const handleOTPChange = (text: any, index: any) => {
+    const latestOtpValue = [otp1, otp2, otp3, otp4];
+    latestOtpValue[index] = text;
+
+    setOtp1(latestOtpValue[0]);
+    setOtp2(latestOtpValue[1]);
+    setOtp3(latestOtpValue[2]);
+    setOtp4(latestOtpValue[3]);
+
+    const backgroundColor = text.length === 0 ? "#fff" : "#f51616";
+
+    inputRefs[index]?.current?.setNativeProps({
+      style: { ...styles.otpInput, backgroundColor },
+    });
+
+    if (text.length === 1 && inputRefs[index + 1]?.current) {
+      inputRefs[index + 1]?.current?.focus();
     }
   };
-  
+
+  const handleOTPKeyPress = (e: any, index: number) => {
+    const latestOtpValue = [otp1, otp2, otp3, otp4];
+
+    if (e.nativeEvent.key === "Backspace" && latestOtpValue[index] === "") {
+      inputRefs[index - 1]?.current?.focus();
+    }
+  };
 
   const handleConfirm = () => {
     const otp = otp1 + otp2 + otp3 + otp4;
@@ -65,55 +73,72 @@ const ConfirmEmailUser = ({ route, navigation }:any) => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Confirm Email</Text>
-      <Text style={styles.description}>
-        Please enter your email address and click the button below to confirm.
-      </Text>
-      <View style={styles.otpContainer}>
-        <TextInput
-          ref={inputRefs[0]}
-          style={styles.otpInput}
-          value={otp1}
-          onChangeText={(text) => handleOTPChange(text, 0)}
-          keyboardType="numeric"
-          maxLength={1}
-        />
-        <TextInput
-          ref={inputRefs[1]}
-          style={styles.otpInput}
-          value={otp2}
-          onChangeText={(text) => handleOTPChange(text, 1)}
-          keyboardType="numeric"
-          maxLength={1}
-        />
-        <TextInput
-          ref={inputRefs[2]}
-          style={styles.otpInput}
-          value={otp3}
-          onChangeText={(text) => handleOTPChange(text, 2)}
-          keyboardType="numeric"
-          maxLength={1}
-        />
-        <TextInput
-          ref={inputRefs[3]}
-          style={styles.otpInput}
-          value={otp4}
-          onChangeText={(text) => handleOTPChange(text, 3)}
-          keyboardType="numeric"
-          maxLength={1}
-        />
-      </View>
-      <TouchableOpacity style={styles.button} onPress={handleConfirm}>
-        <Text style={styles.buttonText}>Confirm Email</Text>
+    <View style={{ flex: 1, backgroundColor: "#fff" }}>
+      
+      <TouchableOpacity style={{margin:20}} onPress={() => navigation.goBack()}>
+      <Ionicons name="arrow-back" size={35} color="black" />
       </TouchableOpacity>
+
+    <View style={styles.lottieContainer}>
+    <View style={styles.lottie}>
+                <Lottie source={require('../../../assets/icons/lottie/ConfirmEmail.json')} autoPlay loop />
+        </View>
+    </View>
+
+
+      <View style={styles.container}>
+        <Text style={styles.title}>Confirm Email</Text>
+        <Text style={styles.description}>
+          Please enter your email address and click the button below to confirm.
+        </Text>
+        <View style={styles.otpContainer}>
+          <TextInput
+            ref={inputRefs[0]}
+            style={styles.otpInput}
+            value={otp1}
+            onChangeText={(text) => handleOTPChange(text, 0)}
+            onKeyPress={(e) => handleOTPKeyPress(e, 0)}
+            keyboardType="numeric"
+            maxLength={1}
+          />
+          <TextInput
+            ref={inputRefs[1]}
+            style={styles.otpInput}
+            value={otp2}
+            onChangeText={(text) => handleOTPChange(text, 1)}
+            onKeyPress={(e) => handleOTPKeyPress(e, 1)}
+            keyboardType="numeric"
+            maxLength={1}
+          />
+          <TextInput
+            ref={inputRefs[2]}
+            style={styles.otpInput}
+            value={otp3}
+            onChangeText={(text) => handleOTPChange(text, 2)}
+            onKeyPress={(e) => handleOTPKeyPress(e, 2)}
+            keyboardType="numeric"
+            maxLength={1}
+          />
+          <TextInput
+            ref={inputRefs[3]}
+            style={styles.otpInput}
+            value={otp4}
+            onChangeText={(text) => handleOTPChange(text, 3)}
+            onKeyPress={(e) => handleOTPKeyPress(e, 3)}
+            keyboardType="numeric"
+            maxLength={1}
+          />
+        </View>
+        <TouchableOpacity style={styles.button} onPress={handleConfirm}>
+          <Text style={styles.buttonText}>Confirm Email</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 20,
@@ -135,13 +160,15 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   otpInput: {
-    width: 40,
-    height: 40,
-    borderWidth: 1,
+    width: 70,
+    height: 70,
+    borderWidth: 2,
     borderColor: "gray",
     marginRight: 8,
     textAlign: "center",
-    fontSize: 20,
+    fontSize: 35,
+    borderRadius: 50,
+    color: "#fff",
   },
   button: {
     backgroundColor: "#4287f5",
@@ -154,6 +181,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
+  otpInputFilled: {
+    width: 70,
+    height: 70,
+    borderWidth: 2,
+    borderColor: "red",
+    marginRight: 8,
+    textAlign: "center",
+    fontSize: 20,
+    backgroundColor: "#f51616",
+  },
+  lottie:{
+    width:300,
+    height:300,
+},
+lottieContainer: {
+  justifyContent: 'center',
+  alignItems: 'center',
+},
 });
 
 export default ConfirmEmailUser;

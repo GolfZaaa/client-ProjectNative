@@ -13,12 +13,14 @@ import {
   anonymousUser,
   removeaddress,
   selectEmail,
+  selectPassword,
   selectToken,
   selectanonymous,
   selectstreet,
   selectuserid,
   selectusername,
   updateEmail,
+  updatePassword,
   updateToken,
   updateUserId,
   updateusername,
@@ -59,7 +61,7 @@ const Navigation = () => {
   const addresstest = useSelector(selectstreet);
   const username = useSelector(selectusername);
   const email = useSelector(selectEmail);
-  
+  const password = useSelector(selectPassword);
 
   useEffect(() => {
     (async () => {
@@ -69,17 +71,15 @@ const Navigation = () => {
         const anonymoususer: any = await AsyncStorage.getItem("anonymous");
         const username: any = await AsyncStorage.getItem("username");
         const email: any = await AsyncStorage.getItem("email");
-  
+
         await dispatch(updateToken(token));
         await dispatch(updateUserId(userId));
         await dispatch(anonymousUser(anonymoususer));
         await dispatch(updateusername(username));
         await dispatch(updateEmail(email));
-      } catch (err) {
-      }
+      } catch (err) {}
     })();
   }, []);
-  
 
   useEffect(() => {
     const fetchData = async () => {
@@ -89,17 +89,14 @@ const Navigation = () => {
           dispatch(GetAddressUser({ userId }) as unknown as AnyAction),
           dispatch(GetDetailUserById({ username: username }) as any),
         ]);
-      } catch (err) {
-      }
+      } catch (err) {}
     };
 
     fetchData();
-  }, [userId,username]);
-  
+  }, [userId, username]);
 
-  console.log(username)
-  console.log(email)
-
+  console.log(username);
+  console.log(email);
 
   const products = useSelector(selectProducts);
 
@@ -119,7 +116,7 @@ const Navigation = () => {
               component={address}
               options={{ headerShown: false }}
             /> */}
-{/* 
+            {/* 
             <Stack.Screen
               name="createaddress"
               component={Address}
@@ -157,13 +154,16 @@ const Navigation = () => {
             {() => (
               <Tab.Navigator>
                 <Tab.Screen
-                  name="product"
+                  name="Product"
                   component={StackProduct}
                   options={{
                     headerShown: false,
                     tabBarIcon: ({ color, size }) => (
                       <FontAwesome name="home" size={24} color={color} />
                     ),
+                    tabBarLabelStyle: {
+                      fontSize: 14,
+                    },
                   }}
                   // listeners={({ navigation }) => ({
                   //   tabPress: () => {
@@ -222,11 +222,6 @@ const Navigation = () => {
                       </View>
                     ),
                   }}
-                  // listeners={({ navigation, route }) => ({
-                  //   tabPress: () => {
-                  //     navigation.navigate("Cart");
-                  //   },
-                  // })}
                 />
 
                 {token && (
@@ -247,15 +242,19 @@ const Navigation = () => {
                       }}
                     /> */}
                     <Tab.Screen
-        name="Setting"
-        component={StackSetting}
-        options={{
-          headerShown: false,
-          tabBarIcon: ({ color, size }) => (
-            <FontAwesome5 name="cog" size={24} color={color} />
-          ),
-        }}
-      />
+                      name="Setting"
+                      component={StackSetting}
+                      initialParams={products}
+                      options={{
+                        headerShown: false,
+                        tabBarIcon: ({ color, size }) => (
+                          <FontAwesome5 name="cog" size={24} color={color} />
+                        ),
+                        tabBarLabelStyle: {
+                          fontSize: 14,
+                        },
+                      }}
+                    />
                   </>
                 )}
               </Tab.Navigator>

@@ -60,7 +60,7 @@ const RegisterScreen = ({ navigation }: any) => {
         <ActivityIndicator size="large" color="blue" />
       ) : (
         <>
-          {error && <Text style={{ color: "red" }}>{error}</Text>}
+          {/* {error && <Text style={{ color: "red" }}>{error}</Text>} */}
           <Text
             style={{
               fontSize: 40,

@@ -3,6 +3,7 @@ import { RootState } from "../../api/store";
 import agent from "../../api/agent";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Alert } from "react-native";
+import { useDispatch } from "react-redux";
 
 interface address {
   province: string;
@@ -25,7 +26,7 @@ interface AccountState {
   newUserName: string;
   name : string;
   newEmail : string;
-  
+  newPassword : string;
 }
 
 const initialState: AccountState = {
@@ -42,6 +43,7 @@ const initialState: AccountState = {
   newUserName: "",
   name : "",
   newEmail : "",
+  newPassword : "",
 };
 
 export const loginAsync = createAsyncThunk(
@@ -153,7 +155,6 @@ export const ChangeEmailUser = createAsyncThunk(
         email,
         newEmail,
       });
-      
       console.log("💖",response.email);
       AsyncStorage.removeItem("email");
       AsyncStorage.setItem("email", newEmail);
@@ -167,6 +168,45 @@ export const ChangeEmailUser = createAsyncThunk(
   }
 );
 
+export const ChangePasswordUser = createAsyncThunk(
+  "Authentication/ChangePassword",
+  async ({ userId, newPassword }: { userId: string;newPassword: string }, { dispatch }) => {
+    try {
+      const response = await agent.Account.changepassword({
+        userId,
+        newPassword,
+      });
+      // dispatch(updatePassword(newPassword)); // ตั้งค่า password ใหม่ใน Redux state
+      return response;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+);
+
+
+export const DeleteUser = createAsyncThunk(
+  "Authentication/Delete",
+  async ({ userId}: { userId: string;}) => {
+    try {
+      const response = await agent.Account.deleteUser({
+        userId,
+      });
+      AsyncStorage.removeItem("email");
+      AsyncStorage.removeItem("username");
+      AsyncStorage.removeItem("userId");
+      AsyncStorage.removeItem("token");
+      ////อันนี้ควรจำ
+      return response;
+    } catch (error) {
+      console.log(error)
+      throw error;
+    }
+  }
+);
+
+
 const accountSlice = createSlice({
   name: "users",
   initialState,
@@ -176,12 +216,17 @@ const accountSlice = createSlice({
     },
     updateusername: (state, action) => {
       state.username = action.payload;
+      // AsyncStorage.removeItem('username');
     },
     updateUserId: (state, action) => {
       state.userid = action.payload;
     },
+    updatePassword: (state, action) => {
+      state.password = action.payload;
+    },
     updateEmail: (state, action) => {
       state.email = action.payload;
+      // AsyncStorage.removeItem('email');
     },
     anonymousUser: (state,action) => {
       state.anonymous = action.payload;
@@ -216,18 +261,13 @@ const accountSlice = createSlice({
         state.token = action.payload.token; 
         state.userid = action.payload.userid;
         state.anonymous = action.payload.anonymous;
+        state.password = action.payload.password;
 
-        if (action.payload.anonymous) {
           AsyncStorage.setItem('anonymous', "true");
-        }
 
-        if (action.payload.token) {
           AsyncStorage.setItem('token', action.payload.token);
-        }
 
-        if (action.payload.userid) {
           AsyncStorage.setItem('userId', action.payload.userid);
-        }
 
           AsyncStorage.setItem('username', action.payload.username);
 
@@ -324,6 +364,33 @@ const accountSlice = createSlice({
       })
 
 
+      .addCase(ChangePasswordUser.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(ChangePasswordUser.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.password = action.payload.password;
+      })
+      .addCase(ChangePasswordUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || "Failed to Change Password users.";
+      })
+
+
+      .addCase(DeleteUser.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(DeleteUser.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.token = null;
+      })
+      .addCase(DeleteUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || "Failed to Change Password users.";
+      })
+
       .addCase(GetDetailUserById.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -349,8 +416,9 @@ export const selectuserid = (state: RootState) => state.account.userid;
 export const selectanonymous = (state: RootState) => state.account.anonymous;
 export const selectstreet = (state: RootState) => state.account.address;
 export const selectChangeUsername = (state: RootState) => state.account.newUserName;
+export const selectPassword = (state: RootState) => state.account.password;
 
 
-export const {updateEmail,updateusername,changename,removeaddress,anonymousadd, test,updateToken,updateUserId,anonymousUser } = accountSlice.actions;
+export const {updatePassword,updateEmail,updateusername,changename,removeaddress,anonymousadd, test,updateToken,updateUserId,anonymousUser } = accountSlice.actions;
 
 export default accountSlice.reducer;

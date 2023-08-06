@@ -15,6 +15,7 @@ import {
   selectstreet,
   selectusername,
   test,
+  updateEmail,
   updateToken,
   updateUserId,
   updateusername,
@@ -42,13 +43,14 @@ const Sildemenu = ({ navigation }: any) => {
   const handleLogout = async () => {
     if (token !== "") {
       try {
-        await AsyncStorage.multiRemove(["token", "userId", "anonymous","username"]);
+        await AsyncStorage.multiRemove(["token", "userId", "anonymous","username,email"]);
         dispatch(updateToken(null));
         dispatch(anonymousUser(false));
         dispatch(updateUserId(null));
         dispatch(removeaddress(null));
         dispatch(updateusername(null));
         dispatch(updateCart(null));
+        dispatch(updateEmail(null));
       } catch (error) {
         console.log("Error removing token:", error);
       }
