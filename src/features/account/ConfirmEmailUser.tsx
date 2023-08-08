@@ -7,7 +7,7 @@ import {
   TextInput,
   Dimensions,
 } from "react-native";
-import { confirmUserAsync } from "./accountSlice";
+import { ReSendEmailToken, confirmUserAsync } from "./accountSlice";
 import { useDispatch } from "react-redux";
 import { Ionicons } from "@expo/vector-icons";
 import Lottie from 'lottie-react-native';
@@ -15,6 +15,10 @@ import Lottie from 'lottie-react-native';
 
 const ConfirmEmailUser = ({ route, navigation }: any) => {
   const { email } = route.params;
+  console.log("params",email)
+  const [ResendButtonDisabled, setResendButtonDisabled] = useState(false);
+  const [TimeResend, setTimeResend] = useState(30);
+
   const [otp1, setOtp1] = useState("");
   const [otp2, setOtp2] = useState("");
   const [otp3, setOtp3] = useState("");
@@ -49,6 +53,7 @@ const ConfirmEmailUser = ({ route, navigation }: any) => {
   };
 
   const handleOTPKeyPress = (e: any, index: number) => {
+    e.persist();
     const latestOtpValue = [otp1, otp2, otp3, otp4];
 
     if (e.nativeEvent.key === "Backspace" && latestOtpValue[index] === "") {
@@ -56,21 +61,51 @@ const ConfirmEmailUser = ({ route, navigation }: any) => {
     }
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     const otp = otp1 + otp2 + otp3 + otp4;
 
     if (otp === "") {
+      console.log("Please enter a Token.");
+      alert("Please enter a Token.");
       return;
     }
-
-    dispatch(confirmUserAsync({ email, emailConfirmationToken: otp }) as any)
-      .then(() => {
+    const asd = await dispatch(confirmUserAsync({ email, emailConfirmationToken: otp }) as any)
+      // .then(() => {
+      //   navigation.navigate("login");
+      // })
+      if (asd?.error?.code !== "ERR_BAD_REQUEST") {
+        alert("Completed To Confirm Email")
         navigation.navigate("login");
-      })
-      .catch(() => {
-        console.log("Failed to Confirm");
-      });
+      } else {
+        alert("Token wrong.");
+      }
+      console.log("😊😊",asd)
   };
+
+  const ResendEmail = async () => {
+    try {
+      await dispatch(ReSendEmailToken({ email: email }) as any);
+      setResendButtonDisabled(true);
+
+      const Cooldown = setInterval(() => {
+        setTimeResend((index) => {
+          if (index === 1) {
+            clearInterval(Cooldown);
+            setResendButtonDisabled(false);
+          }
+          return index - 1;
+        });
+      }, 1000);
+
+      setTimeout(() => {
+        setResendButtonDisabled(false);
+      }, 30000);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+
 
   return (
     <View style={{ flex: 1, backgroundColor: "#fff" }}>
@@ -129,8 +164,21 @@ const ConfirmEmailUser = ({ route, navigation }: any) => {
             maxLength={1}
           />
         </View>
+
+        <View style={{flexDirection:'row',marginBottom:50,marginTop:10}}>
+        <Text style={{ fontWeight: '500', color: 'gray', fontSize: 15, marginRight: 5 }}>Don't receive the TOKEN ?</Text>
+        <TouchableOpacity style={{ flexDirection: 'row', marginBottom: 50}}
+        onPress={ResendEmail}
+        disabled={ResendButtonDisabled} 
+      >
+        <Text style={{ fontSize: 15, fontWeight: '800', color: ResendButtonDisabled ? '#ccc' : '#9617af' }}>
+          {ResendButtonDisabled ? `RESENDING... (${TimeResend}s)` : 'RESEND TOKEN'}
+        </Text>
+      </TouchableOpacity>
+        </View>
+
         <TouchableOpacity style={styles.button} onPress={handleConfirm}>
-          <Text style={styles.buttonText}>Confirm Email</Text>
+          <Text style={styles.buttonText}>VERIFY & PROCEED</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -171,15 +219,19 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   button: {
-    backgroundColor: "#4287f5",
+    backgroundColor: "#ad42f5",
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 5,
+    width:'85%',
+    height:50
   },
   buttonText: {
     color: "white",
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: "bold",
+    textAlign:'center',
+    top:3
   },
   otpInputFilled: {
     width: 70,
@@ -192,8 +244,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#f51616",
   },
   lottie:{
-    width:300,
-    height:300,
+    width:240,
+    height:240,
 },
 lottieContainer: {
   justifyContent: 'center',

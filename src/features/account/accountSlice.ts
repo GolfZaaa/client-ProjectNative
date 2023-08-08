@@ -206,6 +206,18 @@ export const DeleteUser = createAsyncThunk(
   }
 );
 
+export const ReSendEmailToken = createAsyncThunk("Authentication/ResendConfirmEmail",
+  async ({email}: {email: string}) => {
+    try {
+      const response = await agent.Account.resendEmail({email});
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+);
+
+
 
 const accountSlice = createSlice({
   name: "users",
@@ -216,7 +228,7 @@ const accountSlice = createSlice({
     },
     updateusername: (state, action) => {
       state.username = action.payload;
-      // AsyncStorage.removeItem('username');
+      AsyncStorage.removeItem('username');
     },
     updateUserId: (state, action) => {
       state.userid = action.payload;
@@ -226,7 +238,7 @@ const accountSlice = createSlice({
     },
     updateEmail: (state, action) => {
       state.email = action.payload;
-      // AsyncStorage.removeItem('email');
+      AsyncStorage.removeItem('email');
     },
     anonymousUser: (state,action) => {
       state.anonymous = action.payload;
@@ -403,6 +415,17 @@ const accountSlice = createSlice({
         state.error = action.error.message || "Failed to confirm users.";
       })
 
+      .addCase(ReSendEmailToken.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(ReSendEmailToken.fulfilled, (state, action) => {
+        state.isLoading = false;
+      })
+      .addCase(ReSendEmailToken.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || "Failed to ResendEmail.";
+      })
 
   },
 });

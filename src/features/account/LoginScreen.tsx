@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -13,9 +13,11 @@ import {
 } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import {
+  GetDetailUserById,
   anonymousUser,
   anonymousadd,
   loginAsync,
+  selectEmail,
   selectError,
   selectIsLoading,
   selectToken,
@@ -33,6 +35,7 @@ const LoginScreen = ({ navigation }: any) => {
   const [showingToast, setShowingToast] = useState(false);
   const anonymous = useSelector(selectanonymous);
   const token = useSelector(selectToken);
+  const email = useSelector(selectEmail);
 
   const imagelogo = require("../../../assets/iconlogin.png");
 
@@ -43,30 +46,77 @@ const LoginScreen = ({ navigation }: any) => {
   //   dispatch(loginAsync({ username, password }) as any)
   // };
 
-  const handleLogin = ({ navigation }: any) => {
-    setShowingToast(true);
-    dispatch(loginAsync({ username, password }) as any).then((success: any) => {
-      if (success) {
-        setShowingToast(true);
-      } else {
-        setShowingToast(false);
+  console.log("loginemailscreens",email)
+
+
+
+const handleLogin = async () => {
+  setShowingToast(true);
+  const asd = await dispatch(loginAsync({ username, password }) as any);
+  if (asd?.payload?.value.message === "Please confirm your email for the first login.") {
+
+    alert("Please confirm your email for the first login");
+    // อันนี้ควรจำ Start 
+    // ในส่วนนี้จะเป็น login เมื่อ user ที่สมัครยังไม่ทำการ confirm email จะให้เด้งไปหน้า confirmemail screen
+    // แต่ confirmemail screen จะใช้ email ของ user นั้นด้วย ที่นี้วิธีการจะเอา email นั้นก็คือ จะใช้ dispatch GetDetailUserById
+    // เพื่อที่จะนำข้อมูลมาแสดงซึ่งจะใช้แค่ username ตามด้านล่าง หลังจากนั้นจะทำการดึงโดยใช้ detailResponse.payload.email เพื่อเอา
+    // email โดยเฉพาะ แล้วใช้ params ในการส่งไปหน้า confirmeemail screen
+
+    const detailResponse = await dispatch(GetDetailUserById({ username: username }) as any);
+    const email = detailResponse.payload.email;
+    navigation.navigate("confirmemail", { email });
+
+    // อันนี้ควรจำ //////**** End */
+  }
+  console.log("🤷‍♂️🤞", asd.payload.value.message);
+  console.log("🤷‍♂️🤞🤷‍♂️🤞", test);
+
+};
+
+
+  //  Old Start อันเก่า
+
+  // const handleGuestVisit = () => {
+  //   dispatch(anonymousadd());
+  //   AsyncStorage.removeItem("userid");
+  // };
+
+  // Old End อันเก่า
+
+  // New Start อันใหม่
+  const handleGuestVisit = async () => {
+    dispatch(anonymousadd());
+    try {
+      const userIdExists = await AsyncStorage.getItem("userid");
+      if (userIdExists) {
+        await AsyncStorage.removeItem("userid");
       }
-    });
+    } catch (error) {
+      console.error("Error removing 'userid' from AsyncStorage:", error);
+    }
   };
 
-  const handleGuestVisit = () => {
-    dispatch(anonymousadd());
-    AsyncStorage.removeItem("userid");
-  };
+  // New End อันใหม่
 
   React.useEffect(() => {
-    // ใช้ Animated.timing เพื่อทำ Animation ให้กับ fadeAnim โดยเปลี่ยนค่า opacity จาก 0 เป็น 1 ในระยะเวลา 1000 milliseconds
     Animated.timing(fadeAnim, {
       toValue: 1,
       duration: 1000,
       useNativeDriver: true,
     }).start();
   }, [fadeAnim]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        await Promise.all([
+          dispatch(GetDetailUserById({ username: username }) as any),
+        ]);
+      } catch (err) {}
+    };
+    fetchData();
+  }, []);
+
 
   return (
     <View

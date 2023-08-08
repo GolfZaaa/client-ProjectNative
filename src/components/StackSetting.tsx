@@ -140,7 +140,7 @@ const StackSetting = () => {
       dispatch(updateusername(null));
       dispatch(updateCart(null));
       dispatch(updateEmail(null));
-      console.log(response); // Log the response for debugging purposes
+      console.log(response); 
       console.log("Success")
     } catch (error) {
       console.error(error);
@@ -251,7 +251,7 @@ const StackSetting = () => {
           <View style={styles.itemContainer}>
             <Text style={styles.label}>Full Name</Text>
             <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <Text style={{ fontSize: 18, marginRight: 18 }}>
+              <Text style={{ fontSize: 14, marginRight: 18 }}>
                 {username ? (
                   <Text style={styles.text}>{username}</Text>
                 ) : (
@@ -267,7 +267,7 @@ const StackSetting = () => {
           <View style={styles.itemContainer}>
             <Text style={styles.label}>Change Email</Text>
             <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <Text style={{ fontSize: 18, marginRight: 18 }}>
+              <Text style={{ fontSize: 14, marginRight: 18 }}>
                 {email ? (
                   <Text style={{ color: "gray" }}>
                     {email.substring(0, email.indexOf("@"))}**
