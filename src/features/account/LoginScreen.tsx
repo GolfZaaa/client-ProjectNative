@@ -25,6 +25,7 @@ import {
 } from "./accountSlice";
 import { Toast } from "../component/AlertToast";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { AddressSheet } from "@stripe/stripe-react-native";
 
 const LoginScreen = ({ navigation }: any) => {
   const isLoading = useSelector(selectIsLoading);
@@ -41,36 +42,54 @@ const LoginScreen = ({ navigation }: any) => {
 
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
 
-  // const handleLogin = ({navigation}:any) => {
-  //   setShowingToast(true);
-  //   dispatch(loginAsync({ username, password }) as any)
-  // };
-
   console.log("loginemailscreens",email)
 
+
+
+// const handleLogin = async () => {
+//   setShowingToast(true);
+//   const asd = await dispatch(loginAsync({ username, password }) as any);
+//   if (asd?.payload?.value.message === "Please confirm your email for the first login.") {
+//     alert("Please confirm your email for the first login");
+//     // อันนี้ควรจำ Start 
+//     // ในส่วนนี้จะเป็น login เมื่อ user ที่สมัครยังไม่ทำการ confirm email จะให้เด้งไปหน้า confirmemail screen
+//     // แต่ confirmemail screen จะใช้ email ของ user นั้นด้วย ที่นี้วิธีการจะเอา email นั้นก็คือ จะใช้ dispatch GetDetailUserById
+//     // เพื่อที่จะนำข้อมูลมาแสดงซึ่งจะใช้แค่ username ตามด้านล่าง หลังจากนั้นจะทำการดึงโดยใช้ detailResponse.payload.email เพื่อเอา
+//     // email โดยเฉพาะ แล้วใช้ params ในการส่งไปหน้า confirmeemail screen
+
+//     const detailResponse = await dispatch(GetDetailUserById({ username: username }) as any);
+//     const email = detailResponse.payload.email;
+//     navigation.navigate("confirmemail", { email });
+//     // อันนี้ควรจำ //////**** End */
+//   }
+//   console.log("🤷‍♂️🤞", asd.payload.value.message);
+//   console.log("🤷‍♂️🤞🤷‍♂️🤞", test);
+// };
 
 
 const handleLogin = async () => {
   setShowingToast(true);
   const asd = await dispatch(loginAsync({ username, password }) as any);
-  if (asd?.payload?.value.message === "Please confirm your email for the first login.") {
-
+  if (asd?.payload?.value.message === "Invalid username or password. Please try again.") {
+    alert("Invalid username or password. Please try again.");
+    return asd;
+  }
+  if(asd?.payload?.value.message === "Please confirm your email for the first login.")
+  {
     alert("Please confirm your email for the first login");
-    // อันนี้ควรจำ Start 
-    // ในส่วนนี้จะเป็น login เมื่อ user ที่สมัครยังไม่ทำการ confirm email จะให้เด้งไปหน้า confirmemail screen
-    // แต่ confirmemail screen จะใช้ email ของ user นั้นด้วย ที่นี้วิธีการจะเอา email นั้นก็คือ จะใช้ dispatch GetDetailUserById
-    // เพื่อที่จะนำข้อมูลมาแสดงซึ่งจะใช้แค่ username ตามด้านล่าง หลังจากนั้นจะทำการดึงโดยใช้ detailResponse.payload.email เพื่อเอา
-    // email โดยเฉพาะ แล้วใช้ params ในการส่งไปหน้า confirmeemail screen
+//     // อันนี้ควรจำ Start 
+//     // ในส่วนนี้จะเป็น login เมื่อ user ที่สมัครยังไม่ทำการ confirm email จะให้เด้งไปหน้า confirmemail screen
+//     // แต่ confirmemail screen จะใช้ email ของ user นั้นด้วย ที่นี้วิธีการจะเอา email นั้นก็คือ จะใช้ dispatch GetDetailUserById
+//     // เพื่อที่จะนำข้อมูลมาแสดงซึ่งจะใช้แค่ username ตามด้านล่าง หลังจากนั้นจะทำการดึงโดยใช้ detailResponse.payload.email เพื่อเอา
+//     // email โดยเฉพาะ แล้วใช้ params ในการส่งไปหน้า confirmeemail screen
 
     const detailResponse = await dispatch(GetDetailUserById({ username: username }) as any);
     const email = detailResponse.payload.email;
     navigation.navigate("confirmemail", { email });
-
-    // อันนี้ควรจำ //////**** End */
+//     // อันนี้ควรจำ //////**** End */
   }
-  console.log("🤷‍♂️🤞", asd.payload.value.message);
+  console.log("🤷‍♂️🤞🤷‍♂️🤞🤷‍♂️🤞", asd.payload?.value.message);
   console.log("🤷‍♂️🤞🤷‍♂️🤞", test);
-
 };
 
 

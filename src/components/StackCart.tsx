@@ -44,11 +44,11 @@ const StackCart = ({ navigation, route, item }: any) => {
   const userId = useSelector(selectuserid);
   const cart: any = useSelector(selectCartItems);
   const token = useSelector(selectToken);
-  const addressuser = useSelector(selectstreet);
+  const addressuser:any = useSelector(selectstreet);
 
   const [isModalVisible, setModalVisible] = useState(false);
 
-  console.log("🤷‍♀️", addressuser);
+  console.log("🤷‍♀️", addressuser.statusCode);
   console.log("😜", cart.items);
 
   useEffect(() => {
@@ -242,7 +242,7 @@ const StackCart = ({ navigation, route, item }: any) => {
                 </Text>
               </View>
 
-              {addressuser.length === 0 ? (
+              {addressuser.statusCode === 400 ? (
                 <View style={{ marginTop: 40,position:'absolute' }}>
                   <TouchableOpacity
                     style={{
@@ -257,9 +257,7 @@ const StackCart = ({ navigation, route, item }: any) => {
                     }}
                     onPress={toggleModal}
                   >
-                    <Text
-                      style={{ color: "#fff", fontSize: 25, fontWeight: "600" }}
-                    >
+                    <Text style={{ color: "#fff", fontSize: 25, fontWeight: "600" }}>
                       Order
                     </Text>
                   </TouchableOpacity>

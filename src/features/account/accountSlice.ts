@@ -4,6 +4,7 @@ import agent from "../../api/agent";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Alert } from "react-native";
 import { useDispatch } from "react-redux";
+import {useNavigation} from "@react-navigation/native"
 
 interface address {
   province: string;
@@ -46,13 +47,14 @@ const initialState: AccountState = {
   newPassword : "",
 };
 
-export const loginAsync = createAsyncThunk(
+export const  loginAsync = createAsyncThunk(
   "Authentication/Login",
   async ({ username, password }: { username: string; password: string }) => {
     const response = await agent.Account.login({ username, password });
     return response;
   }
 );
+
 
 export const registerAsync = createAsyncThunk(
   "Authentication/Register",
@@ -228,7 +230,7 @@ const accountSlice = createSlice({
     },
     updateusername: (state, action) => {
       state.username = action.payload;
-      AsyncStorage.removeItem('username');
+      AsyncStorage.getItem('username');
     },
     updateUserId: (state, action) => {
       state.userid = action.payload;
@@ -238,7 +240,7 @@ const accountSlice = createSlice({
     },
     updateEmail: (state, action) => {
       state.email = action.payload;
-      AsyncStorage.removeItem('email');
+      // AsyncStorage.removeItem('email');
     },
     anonymousUser: (state,action) => {
       state.anonymous = action.payload;
@@ -257,7 +259,11 @@ const accountSlice = createSlice({
     },
     changename:(state,action) => {
       state.username = action.payload;
+      AsyncStorage.removeItem('username');
+      AsyncStorage.setItem('username', action.payload);
     }
+    // เคยติด เพราะใช้ action.payload.username
+
   },
   
   extraReducers: (builder) => {

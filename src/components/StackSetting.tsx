@@ -34,6 +34,7 @@ import {
 import { HttpStatusCode } from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { updateCart } from "../features/cart/cartSlice";
+import { LinearGradient } from "expo-linear-gradient";
 
 const StackSetting = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -66,21 +67,24 @@ const StackSetting = () => {
         return;
       }
       if (username !== newUserName) {
-        const asd = await dispatch(
+        const asd:any = await dispatch(
           ChangeNameUser({
             userId: userId,
             username: username,
             newUserName: newUserName,
           }) as any
         );
-        if (asd?.error?.code !== "ERR_BAD_REQUEST") {
+        if (asd.payload.statusCode === HttpStatusCode.Ok) {
           handleCloseModal();
           dispatch(changename(newUserName));
           fetchData(newUserName);
-          setData(asd.meta.arg.newUserName);
+ 
         } else {
           alert("Username is already taken.");
+          dispatch(changename(username));
+          fetchData(newUserName);
         }
+    console.log("Username",asd)
       } else {
         alert("Please enter a different Username.");
       }
@@ -338,7 +342,33 @@ const StackSetting = () => {
                   </TouchableOpacity>
                 </View>
 
-                <Button title="Save" onPress={ChangeName} />
+                <TouchableOpacity
+                  style={{
+                    marginTop: 20,
+                    width: "100%",
+                    height: 40,
+                    borderRadius: 30,
+                  }}
+                  onPress={ChangeName}
+                >
+                  <LinearGradient
+                    style={{
+                      flex: 1,
+                      justifyContent: "center",
+                      alignItems: "center",
+                      borderRadius: 30,
+                    }}
+                    colors={["orange", "pink"]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                  >
+                    <Text
+                      style={{ fontSize: 17, fontWeight: "400", color: "#fff" }}
+                    >
+                      Confirm
+                    </Text>
+                  </LinearGradient>
+                </TouchableOpacity>
               </View>
             </Animated.View>
           </View>

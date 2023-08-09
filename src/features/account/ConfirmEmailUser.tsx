@@ -70,16 +70,14 @@ const ConfirmEmailUser = ({ route, navigation }: any) => {
       return;
     }
     const asd = await dispatch(confirmUserAsync({ email, emailConfirmationToken: otp }) as any)
-      // .then(() => {
-      //   navigation.navigate("login");
-      // })
-      if (asd?.error?.code !== "ERR_BAD_REQUEST") {
+      if(asd.payload?.value.message !== "Invalid email confirmation token.")
+      {
         alert("Completed To Confirm Email")
         navigation.navigate("login");
-      } else {
+      }else{
         alert("Token wrong.");
       }
-      console.log("😊😊",asd)
+      console.log("😊😊",asd.payload.value.message)
   };
 
   const ResendEmail = async () => {
@@ -105,7 +103,7 @@ const ConfirmEmailUser = ({ route, navigation }: any) => {
     }
   };
 
-
+  
 
   return (
     <View style={{ flex: 1, backgroundColor: "#fff" }}>
