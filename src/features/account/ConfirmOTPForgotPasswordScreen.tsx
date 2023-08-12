@@ -1,29 +1,29 @@
-import React, { useState, useRef } from "react";
 import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  TextInput,
-  Dimensions,
-} from "react-native";
-import { ReSendEmailToken, confirmUserAsync } from "./accountSlice";
+    StyleSheet,
+    Text,
+    View,
+    TouchableOpacity,
+    TextInput,
+    Dimensions,
+  } from "react-native";
+import React, { useRef, useState } from 'react'
 import { useDispatch } from "react-redux";
 import { Ionicons } from "@expo/vector-icons";
 import Lottie from 'lottie-react-native';
+import { ConfirmOtpPassword, ResetForgotPasswordToken } from "./accountSlice";
 
+const ConfirmOTPForgotPasswordScreen = ({ route, navigation }: any) => {
 
-const ConfirmEmailUser = ({ route, navigation }: any) => {
+  const dispatch = useDispatch();
   const { email } = route.params;
-  console.log("params",email)
+  const [test, settest] = useState("")
+  
   const [ResendButtonDisabled, setResendButtonDisabled] = useState(false);
   const [TimeResend, setTimeResend] = useState(30);
-
   const [otp1, setOtp1] = useState("");
   const [otp2, setOtp2] = useState("");
   const [otp3, setOtp3] = useState("");
   const [otp4, setOtp4] = useState("");
-  const dispatch = useDispatch();
 
   const inputRefs = [
     useRef<TextInput>(null),
@@ -41,7 +41,7 @@ const ConfirmEmailUser = ({ route, navigation }: any) => {
     setOtp3(latestOtpValue[2]);
     setOtp4(latestOtpValue[3]);
 
-    const backgroundColor = text.length === 0 ? "#fff" : "#7a0274";
+    const backgroundColor = text.length === 0 ? "#fff" : "#039fdd";
 
     inputRefs[index]?.current?.setNativeProps({
       style: { ...styles.otpInput, backgroundColor },
@@ -69,20 +69,30 @@ const ConfirmEmailUser = ({ route, navigation }: any) => {
       alert("Please enter a Token.");
       return;
     }
-    const asd = await dispatch(confirmUserAsync({ email, emailConfirmationToken: otp }) as any)
-      if(asd.payload?.value.message !== "Invalid email confirmation token.")
-      {
-        alert("Completed To Confirm Email")
-        navigation.navigate("login");
-      }else{
-        alert("Token wrong.");
-      }
-      console.log("😊😊",asd.payload.value.message)
+    const asd = await dispatch(ConfirmOtpPassword({ email:email, confirmForgotPassowrd: otp }) as any)
+      // if(asd.payload?.value.message === "Confirmed token successfully go to ResetPassword.")
+      // {
+      //   alert("Completed To Confirm Email for forgotpassword ")
+      //   navigation.navigate("CreateNewPassword");
+      // }else{
+      //   alert("Token wrong.");
+      // }
+      
+        if(asd.payload.message === "Confirmed token successfully go to ResetPassword.")
+        {
+        alert("Completed To Confirm Email for forgotpassword ")
+        navigation.navigate("CreateNewPassword",{email});
+        }
+
+      console.log("😊😊",asd.payload.message)
   };
 
+  console.log("params",email)
+
+  
   const ResendEmail = async () => {
     try {
-      await dispatch(ReSendEmailToken({ email: email }) as any);
+      await dispatch(ResetForgotPasswordToken({ email: email }) as any);
       setResendButtonDisabled(true);
 
       const Cooldown = setInterval(() => {
@@ -103,8 +113,6 @@ const ConfirmEmailUser = ({ route, navigation }: any) => {
     }
   };
 
-  
-
   return (
     <View style={{ flex: 1, backgroundColor: "#fff" }}>
       
@@ -114,15 +122,20 @@ const ConfirmEmailUser = ({ route, navigation }: any) => {
 
     <View style={styles.lottieContainer}>
     <View style={styles.lottie}>
-                <Lottie source={require('../../../assets/icons/lottie/ConfirmEmail.json')} autoPlay loop />
+                <Lottie source={require('../../../assets/icons/lottie/ConfirmPassword.json')} autoPlay loop />
         </View>
     </View>
 
 
       <View style={styles.container}>
-        <Text style={styles.title}>Confirm Email</Text>
         <Text style={styles.description}>
-          Please enter your email address and click the button below to confirm.
+          Enter the verification code we 
+        </Text>
+        <Text style={styles.description}>
+        just sent you on your email 
+        </Text>
+        <Text style={styles.description}>
+        address.
         </Text>
         <View style={styles.otpContainer}>
           <TextInput
@@ -164,13 +177,13 @@ const ConfirmEmailUser = ({ route, navigation }: any) => {
         </View>
 
         <View style={{flexDirection:'row',marginBottom:50,marginTop:10}}>
-        <Text style={{ fontWeight: '500', color: 'gray', fontSize: 15, marginRight: 5 }}>Don't receive the TOKEN ?</Text>
+        <Text style={{ fontWeight: '500', color: 'gray', fontSize: 15, marginRight: 5 }}>Don't receive the OTP ?</Text>
         <TouchableOpacity style={{ flexDirection: 'row', marginBottom: 50}}
         onPress={ResendEmail}
         disabled={ResendButtonDisabled} 
       >
         <Text style={{ fontSize: 15, fontWeight: '800', color: ResendButtonDisabled ? '#ccc' : '#9617af' }}>
-          {ResendButtonDisabled ? `RESENDING... (${TimeResend}s)` : 'RESEND TOKEN'}
+          {ResendButtonDisabled ? `RESENDING... (${TimeResend}s)` : 'RESEND OTP'}
         </Text>
       </TouchableOpacity>
         </View>
@@ -180,8 +193,10 @@ const ConfirmEmailUser = ({ route, navigation }: any) => {
         </TouchableOpacity>
       </View>
     </View>
-  );
-};
+  )
+}
+
+export default ConfirmOTPForgotPasswordScreen
 
 const styles = StyleSheet.create({
   container: {
@@ -196,14 +211,16 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   description: {
-    fontSize: 16,
+    fontSize: 21,
     textAlign: "center",
-    marginBottom: 32,
+    fontWeight:'500',
+    marginBottom:2
   },
   otpContainer: {
     flexDirection: "row",
     justifyContent: "center",
     marginBottom: 16,
+    paddingTop:40,
   },
   otpInput: {
     width: 70,
@@ -216,6 +233,7 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     color: "#fff",
     fontWeight:'500',
+
   },
   button: {
     backgroundColor: "#ad42f5",
@@ -243,13 +261,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#f51616",
   },
   lottie:{
-    width:240,
-    height:240,
+    width:180,
+    height:180,
 },
 lottieContainer: {
   justifyContent: 'center',
   alignItems: 'center',
+  paddingBottom:50,
+  paddingTop:20
 },
-});
-
-export default ConfirmEmailUser;
+})

@@ -43,7 +43,7 @@ const Sildemenu = ({ navigation }: any) => {
   const handleLogout = async () => {
     if (token !== "") {
       try {
-        await AsyncStorage.multiRemove(["token", "userId", "anonymous","username,email"]);
+        await AsyncStorage.multiRemove(["token", "userId", "anonymous","username","email"]);
         dispatch(updateToken(null));
         dispatch(anonymousUser(false));
         dispatch(updateUserId(null));

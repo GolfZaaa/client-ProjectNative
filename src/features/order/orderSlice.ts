@@ -4,23 +4,29 @@ import agent from "../../api/agent";
 import { useSelector} from 'react-redux';
 
 
+interface Order {
+  id: string;
+  OrderDate: string;
+  TotalAmount: number;
+  clientSecret: string;
+}
 
-interface CartState {
+interface OrderState {
   isLoading: boolean;
   error: string | null;
   userId : string;
   totalAmount : number;
-  order:[]
+  order:Order[]
   address:any
 }
 
-const initialState: CartState = {
+const initialState: OrderState = {
   isLoading: false,
   error: null,
   userId: '',
   totalAmount: 0,
   order: [],
-  address:""
+  address:"",
 };
 
 
@@ -45,13 +51,13 @@ export const CreateOrderUser = createAsyncThunk(
   export const GetOrderUser = createAsyncThunk(
     "Order/GetOrdersByUsername",
     async ({
-      userId,
+      username,
     }: {
-      userId: string;
+      username: string;
     }) => {
       try {
-        const response = await agent.OrderUser.ShowOrderUser({
-          userId,
+        const response = await agent.OrderUser.GetShowOrderUser({
+          username,
         });
         console.log(response);
         return response;
@@ -99,5 +105,6 @@ const orderSlice = createSlice({
 });
 
 export const selectorder = (state: any) => state.order.order;
+
 
 export default orderSlice.reducer;

@@ -35,7 +35,8 @@ import { AntDesign } from "@expo/vector-icons";
 import { CreateOrderUser } from "../features/order/orderSlice";
 import Lottie from "lottie-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import TwoOptionModalAlert from "../features/component/TwoOptionModalAlert";
+import TwoOptionModalAlert from "../features/component/TwoOptionModalAlertNoHaveAddress";
+import TwoOptionModalAlertHaveAddress from "../features/component/TwoOptionModalAlertHaveAddress";
 
 const { width, height } = Dimensions.get("window");
 
@@ -47,9 +48,11 @@ const StackCart = ({ navigation, route, item }: any) => {
   const addressuser:any = useSelector(selectstreet);
 
   const [isModalVisible, setModalVisible] = useState(false);
+  const [ModalVisibleHaveAddress, setModalVisibleHaveAddress] = useState(false);
 
   console.log("🤷‍♀️", addressuser.statusCode);
   console.log("😜", cart.items);
+  console.log("addressuser",addressuser.value.subDistrict)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -66,28 +69,42 @@ const StackCart = ({ navigation, route, item }: any) => {
   }, [userId]);
 
   const CreateOrder = async (id: any) => {
-    await dispatch(CreateOrderUser({ userId }) as any);
-    await dispatch(updateCart(null));
+    // await dispatch(CreateOrderUser({ userId }) as any);
+    // await dispatch(updateCart(null));
+    navigation.navigate("orders");
+
   };
 
   const handleAddress = async (id: any) => {
     navigation.navigate("createaddress");
   };
 
+  const handleGotoOrder = async (id: any) => {
+    navigation.navigate("orders");
+
+  };
+
   const toggleModal = () => {
     setModalVisible(!isModalVisible);
   };
 
+  const toggleModalHaveAddress = () => {
+    setModalVisibleHaveAddress(!ModalVisibleHaveAddress);
+  };
+
   const handleConfirm = () => {
-    // ทำงานเมื่อกด Confirm
     console.log("Confirmed");
     toggleModal();
   };
 
   const handleCancel = () => {
-    // ทำงานเมื่อกด Cancel
     console.log("Cancelled");
     toggleModal();
+  };
+
+  const handleCancelHaveAddress = () => {
+    console.log("Cancelled");
+    toggleModalHaveAddress();
   };
 
   const handleLogout = async () => {
@@ -292,7 +309,7 @@ const StackCart = ({ navigation, route, item }: any) => {
                       top:75,
                       left:10
                     }}
-                    onPress={CreateOrder}
+                    onPress={toggleModalHaveAddress}
                   >
                     <Text
                       style={{ color: "#fff", fontSize: 25, fontWeight: "600" }}
@@ -300,7 +317,24 @@ const StackCart = ({ navigation, route, item }: any) => {
                       Order
                     </Text>
                   </TouchableOpacity>
-                </View>
+
+                <View
+                style={{
+                  flex: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <TwoOptionModalAlertHaveAddress
+                  isVisible={ModalVisibleHaveAddress}
+                  onClose={toggleModalHaveAddress}
+                  title={"Confirm delivery address"}
+                  onConfirm={handleGotoOrder}
+                  onCancel={handleCancelHaveAddress}
+                />
+              </View>
+              </View>
+
               )}
             </View>
           ) : (

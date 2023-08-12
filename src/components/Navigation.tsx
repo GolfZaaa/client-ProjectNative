@@ -45,7 +45,13 @@ import StackHome from "./StackHome";
 import checkoutscreen from "../features/checkout/checkoutscreen";
 import address from "../features/account/address";
 import Address from "../features/account/address";
+import ForgotPasswordScreen from "../features/account/ForgotPasswordScreen";
+import CheckyouEmailScreen from "../features/account/CheckyouEmailScreen";
+import CreateNewPasswordScreen from "../features/account/CreateNewPasswordScreen";
+import InPutOTPForgotPasswordScreen from "../features/account/ConfirmOTPForgotPasswordScreen";
+import { GetOrderUser } from "../features/order/orderSlice";
 import StackSetting from "./StackSetting";
+import SettingScreen from "../features/account/EditSettingUserScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -88,6 +94,7 @@ const Navigation = () => {
           dispatch(getCartAsync({ userId }) as unknown as AnyAction),
           dispatch(GetAddressUser({ userId }) as unknown as AnyAction),
           dispatch(GetDetailUserById({ username: username }) as any),
+          dispatch(GetOrderUser({ username: username }) as any),
         ]);
       } catch (err) {}
     };
@@ -122,6 +129,7 @@ const Navigation = () => {
               component={Address}
               options={{ headerShown: false }}
             /> */}
+
             <Stack.Screen
               name="Onboarding"
               component={StackOnboard}
@@ -148,6 +156,27 @@ const Navigation = () => {
               component={ConfirmEmailUser}
               options={{ headerShown: false }}
             />
+
+            <Stack.Screen
+              name="CreateNewPassword"
+              component={CreateNewPasswordScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="CheckyouEmail"
+              component={CheckyouEmailScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="OptForgotPassword"
+              component={InPutOTPForgotPasswordScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="forgotpassword"
+              component={ForgotPasswordScreen}
+              options={{ headerShown: false }}
+            />
           </>
         ) : (
           <Stack.Screen name="homeproduct" options={{ headerShown: false }}>
@@ -165,98 +194,52 @@ const Navigation = () => {
                       fontSize: 14,
                     },
                   }}
-                  // listeners={({ navigation }) => ({
-                  //   tabPress: () => {
-                  //     navigation.navigate("homeproduct", {
-                  //       screen: "product",
-                  //     });
-                  //   },
-                  // })}
                 />
 
-                {/* <Tab.Screen
-                  name="Createaddress"
-                  component={address}
-                  options={{
-                    headerShown: false,
-                    tabBarIcon: ({ color, size }) => (
-                      <FontAwesome name="home" size={24} color={color} />
-                    ),
-                  }}
-                  listeners={({ navigation }) => ({
-                    tabPress: () => {
-                      navigation.navigate("homeproduct", {
-                        screen: "product",
-                      });
-                      navigation.reset({
-                        index: 0,
-                        routes: [{ name: "homeproduct" }],
-                      });
-                    },
-                  })}
-                /> */}
+                {token && (
+                  <Tab.Screen
+                    name="Cart"
+                    component={StackCart}
+                    initialParams={products}
+                    options={{
+                      headerShown: false,
+                      tabBarIcon: ({ color, size }) => (
+                        <Icon name="shopping-cart" color={color} size={size} />
+                      ),
+                      tabBarLabel: ({ color }) => (
+                        <View style={styles.tabBarLabel}>
+                          <Text style={{ color }}>Cart</Text>
+                          {token && (
+                            <View>
+                              {cart.items && cart.items.length > 0 && (
+                                <View style={styles.itemCountContainer}>
+                                  <Text style={styles.itemCountText}>
+                                    {cart.items.length}
+                                  </Text>
+                                </View>
+                              )}
+                            </View>
+                          )}
+                        </View>
+                      ),
+                    }}
+                  />
+                )}
 
                 <Tab.Screen
-                  name="Cart"
-                  component={StackCart}
+                  name="Setting"
+                  component={StackSetting}
                   initialParams={products}
                   options={{
                     headerShown: false,
                     tabBarIcon: ({ color, size }) => (
-                      <Icon name="shopping-cart" color={color} size={size} />
+                      <FontAwesome5 name="cog" size={24} color={color} />
                     ),
-                    tabBarLabel: ({ color }) => (
-                      <View style={styles.tabBarLabel}>
-                        <Text style={{ color }}>Cart</Text>
-                        {token && (
-                          <View>
-                            {cart.items && cart.items.length > 0 && (
-                              <View style={styles.itemCountContainer}>
-                                <Text style={styles.itemCountText}>
-                                  {cart.items.length}
-                                </Text>
-                              </View>
-                            )}
-                          </View>
-                        )}
-                      </View>
-                    ),
+                    tabBarLabelStyle: {
+                      fontSize: 14,
+                    },
                   }}
                 />
-
-                {token && (
-                  <>
-                    {/* <Tab.Screen
-                      name="History"
-                      component={StackHistory}
-                      initialParams={products}
-                      options={{
-                        headerShown: false,
-                        tabBarIcon: ({ color, size }) => (
-                          <FontAwesome5
-                            name="history"
-                            size={24}
-                            color="black"
-                          />
-                        ),
-                      }}
-                    /> */}
-                    <Tab.Screen
-                      name="Setting"
-                      component={StackSetting}
-                      initialParams={products}
-                      options={{
-                        headerShown: false,
-                        tabBarIcon: ({ color, size }) => (
-                          <FontAwesome5 name="cog" size={24} color={color} />
-                        ),
-                        tabBarLabelStyle: {
-                          fontSize: 14,
-                        },
-                      }}
-                    />
-                  </>
-                )}
               </Tab.Navigator>
             )}
           </Stack.Screen>

@@ -7,6 +7,8 @@ import ProducuDetailScreen from "../features/product/ProducuDetailScreen";
 import SettingUser from "../features/account/SettingUser";
 import Address from "../features/account/address";
 import OrderScreen from "../features/checkout/OrderScreen";
+import ForgotPasswordScreen from "../features/account/ForgotPasswordScreen";
+import SettingScreen from "../features/account/EditSettingUserScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -38,6 +40,7 @@ const StackProduct = () => {
         component={OrderScreen}
         options={{ headerShown: false }}
       />
+      
     </Stack.Navigator>
   );
 };

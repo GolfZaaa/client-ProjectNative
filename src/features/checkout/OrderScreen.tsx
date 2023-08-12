@@ -2,31 +2,70 @@ import {
   StyleSheet,
   Text,
   View,
-  TextStyle,
+  Alert,
   TouchableOpacity,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { selectCartItems, updateCart } from "../cart/cartSlice";
-import { CreateOrderUser } from "../order/orderSlice";
+import { CreateOrderUser, selectorder } from "../order/orderSlice";
 import { GetAddressUser, selectuserid } from "../account/accountSlice";
 import Lottie from "lottie-react-native";
 import { AnyAction } from "@reduxjs/toolkit";
+import { initPaymentSheet, presentPaymentSheet } from "@stripe/stripe-react-native";
 
 const OrderScreen = ({navigation}:any) => {
   const dispatch = useDispatch();
   const userId = useSelector(selectuserid);
   const cart: any = useSelector(selectCartItems);
-
+  const order = useSelector(selectorder);
+  // order.length - 1 คือไปที่ array ลำดับสุดท้าย 
+  const latestOrder =  order[order.length - 1] ;
+  const latestClientSecret =  latestOrder.clientSecret ;
+  console.log("ClientSecret", order[0]);
+  console.log("latestClientSecret", latestClientSecret);
+  
   const [showModal, setShowModal] = useState(false);
 
   const CreateOrder = async (id: any) => {
     await dispatch(CreateOrderUser({ userId }) as any);
     await dispatch(updateCart(null));
-    await dispatch(GetAddressUser({ userId }) as unknown as AnyAction),
-    setShowModal(true);
+    // await dispatch(GetAddressUser({ userId }) as unknown as AnyAction)
+    // Alert.alert('I goof', 'My Alert Msg', [
+    //   {
+    //     text: 'Cancel',
+    //     onPress: () => console.log('Cancel Pressed'),
+    //     style: 'cancel',
+    //   },
+    //   {text: 'OK', onPress: () => handleConfirmPayment()},
+    // ]);
+    handleConfirmPayment();
   };
+ 
+  const handleConfirmPayment = async () => {
+    try {
+      const { error } = await initPaymentSheet({
+        paymentIntentClientSecret: latestClientSecret,
+        merchantDisplayName: "Admin", 
+      });
 
+      const { paymentOption } = await presentPaymentSheet();
+
+      if (error) {
+        console.error("Payment confirmation failed:", error.message);
+        // Handle the payment error here
+      } else {
+        // Payment is successful, update the order status as "success"
+        console.log("Payment successful. Payment Method ID:", paymentOption);
+        // Implement your code to update the order status as "success" here
+        navigation.navigate("homeproduct" as never);
+      }
+    } catch (e: any) {
+      console.error("Payment confirmation failed:", e.message);
+      // Handle the payment error here
+    }
+  };
+  
   console.log(cart);
   return (
     <View style={{ backgroundColor: "#fff", flex: 1 }}>

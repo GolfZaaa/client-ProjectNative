@@ -2,7 +2,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React from "react";
 import Modal from "react-native-modal/dist/modal";
 
-const TwoOptionModalAlert = ({
+const TwoOptionModalAlertNoHaveAddress = ({
   isVisible,
   onClose,
   title,
@@ -57,7 +57,7 @@ const TwoOptionModalAlert = ({
   );
 };
 
-export default TwoOptionModalAlert;
+export default TwoOptionModalAlertNoHaveAddress;
 
 const styles = StyleSheet.create({
   cancelButton: {

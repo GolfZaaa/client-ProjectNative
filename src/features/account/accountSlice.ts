@@ -9,8 +9,8 @@ import {useNavigation} from "@react-navigation/native"
 interface address {
   province: string;
   district: string;
-  subdistrict: string;
-  postalcode:string;
+  subDistrict: string;
+  postalCode:string;
 }
 
 interface AccountState {
@@ -19,7 +19,6 @@ interface AccountState {
   username: string;
   password: string;
   isLoading: boolean;
-  error: string | null;
   token: string | null; 
   userid : string;
   anonymous:any;
@@ -28,6 +27,7 @@ interface AccountState {
   name : string;
   newEmail : string;
   newPassword : string;
+  confirmPassword : string;
 }
 
 const initialState: AccountState = {
@@ -36,7 +36,6 @@ const initialState: AccountState = {
   username: "",
   password: "",
   isLoading: false,
-  error: null,
   token: null,
   userid : "",
   anonymous : null,
@@ -45,6 +44,7 @@ const initialState: AccountState = {
   name : "",
   newEmail : "",
   newPassword : "",
+  confirmPassword : "",
 };
 
 export const  loginAsync = createAsyncThunk(
@@ -219,6 +219,50 @@ export const ReSendEmailToken = createAsyncThunk("Authentication/ResendConfirmEm
   }
 );
 
+export const ResetForgotPasswordToken = createAsyncThunk("Authentication/ResendConfirmForgotPassword",
+  async ({email}: {email: string}) => {
+    try {
+      const response = await agent.Account.ResetForgotPassword({email});
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+);
+
+export const SendMessageToForgotPassword = createAsyncThunk("Authentication/SendMessageToForgotPassword",
+  async ({email}: {email: string}) => {
+    try {
+      const response = await agent.Account.SendMessageToForgotPassword({email});
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+);
+
+export const ConfirmOtpPassword = createAsyncThunk("Authentication/ConfirmEmailToForgotPassword",
+  async ({email,confirmForgotPassowrd}: {email: string, confirmForgotPassowrd:string}) => {
+    try {
+      const response = await agent.Account.ConfirmOTPForgotPassword({email, confirmForgotPassowrd});
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+);
+
+export const CreateNewPassword = createAsyncThunk("Authentication/ForgetPassword",
+  async ({email,password,confirmPassword}: {email: string, password:string, confirmPassword:string}) => {
+    try {
+      const response = await agent.Account.CreateNewPassword({email, password, confirmPassword});
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+);
+
 
 
 const accountSlice = createSlice({
@@ -261,16 +305,20 @@ const accountSlice = createSlice({
       state.username = action.payload;
       AsyncStorage.removeItem('username');
       AsyncStorage.setItem('username', action.payload);
-    }
+    },
     // เคยติด เพราะใช้ action.payload.username
 
+    changeemail:(state,action) => {
+      state.email = action.payload;
+      AsyncStorage.removeItem('email');
+      AsyncStorage.setItem('email', action.payload);
+    }
   },
   
   extraReducers: (builder) => {
     builder
       .addCase(loginAsync.pending, (state) => {
         state.isLoading = true;
-        state.error = null;
       })
       .addCase(loginAsync.fulfilled, (state, action) => {
         state.isLoading = false;
@@ -294,39 +342,32 @@ const accountSlice = createSlice({
       })
       .addCase(loginAsync.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || "Failed to login users.";
-        console.log(state.error);
       })
 
       .addCase(registerAsync.pending, (state) => {
         state.isLoading = true;
-        state.error = null;
       })
       .addCase(registerAsync.fulfilled, (state, action) => {
         state.isLoading = false;
       })
       .addCase(registerAsync.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || "Failed to register users.";
       })
 
       .addCase(confirmUserAsync.pending, (state) => {
         state.isLoading = true;
-        state.error = null;
       })
       .addCase(confirmUserAsync.fulfilled, (state, action) => {
         state.isLoading = false;
       })
       .addCase(confirmUserAsync.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || "Failed to confirm users.";
       })
 
 
 
       .addCase(createaddress.pending, (state) => {
         state.isLoading = true;
-        state.error = null;
       })
       .addCase(createaddress.fulfilled, (state, action) => {
         state.isLoading = false;
@@ -334,12 +375,10 @@ const accountSlice = createSlice({
       })
       .addCase(createaddress.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || "Failed to confirm users.";
       })
 
       .addCase(GetAddressUser.pending, (state) => {
         state.isLoading = true;
-        state.error = null;
       })
 
       .addCase(GetAddressUser.fulfilled, (state, action) => {
@@ -348,14 +387,12 @@ const accountSlice = createSlice({
       })
       .addCase(GetAddressUser.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || "Failed to confirm users.";
       })
 
 
 
       .addCase(ChangeNameUser.pending, (state) => {
         state.isLoading = true;
-        state.error = null;
       })
       .addCase(ChangeNameUser.fulfilled, (state, action) => {
         state.isLoading = false;
@@ -364,12 +401,10 @@ const accountSlice = createSlice({
       })
       .addCase(ChangeNameUser.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || "Failed to Change name users.";
       })
 
       .addCase(ChangeEmailUser.pending, (state) => {
         state.isLoading = true;
-        state.error = null;
       })
       .addCase(ChangeEmailUser.fulfilled, (state, action) => {
         state.isLoading = false;
@@ -378,13 +413,11 @@ const accountSlice = createSlice({
       })
       .addCase(ChangeEmailUser.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || "Failed to Change Email users.";
       })
 
 
       .addCase(ChangePasswordUser.pending, (state) => {
         state.isLoading = true;
-        state.error = null;
       })
       .addCase(ChangePasswordUser.fulfilled, (state, action) => {
         state.isLoading = false;
@@ -392,13 +425,11 @@ const accountSlice = createSlice({
       })
       .addCase(ChangePasswordUser.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || "Failed to Change Password users.";
       })
 
 
       .addCase(DeleteUser.pending, (state) => {
         state.isLoading = true;
-        state.error = null;
       })
       .addCase(DeleteUser.fulfilled, (state, action) => {
         state.isLoading = false;
@@ -406,38 +437,75 @@ const accountSlice = createSlice({
       })
       .addCase(DeleteUser.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || "Failed to Change Password users.";
       })
 
       .addCase(GetDetailUserById.pending, (state) => {
         state.isLoading = true;
-        state.error = null;
       })
       .addCase(GetDetailUserById.fulfilled, (state, action) => {
         state.isLoading = false;
       })
       .addCase(GetDetailUserById.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || "Failed to confirm users.";
       })
 
       .addCase(ReSendEmailToken.pending, (state) => {
         state.isLoading = true;
-        state.error = null;
       })
       .addCase(ReSendEmailToken.fulfilled, (state, action) => {
         state.isLoading = false;
       })
       .addCase(ReSendEmailToken.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || "Failed to ResendEmail.";
+      })
+
+      .addCase(SendMessageToForgotPassword.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(SendMessageToForgotPassword.fulfilled, (state, action) => {
+        state.isLoading = false;
+      })
+      .addCase(SendMessageToForgotPassword.rejected, (state, action) => {
+        state.isLoading = false;
+      })
+
+
+      .addCase(ConfirmOtpPassword.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(ConfirmOtpPassword.fulfilled, (state, action) => {
+        state.isLoading = false;
+      })
+      .addCase(ConfirmOtpPassword.rejected, (state, action) => {
+        state.isLoading = false;
+      })
+
+
+      .addCase(ResetForgotPasswordToken.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(ResetForgotPasswordToken.fulfilled, (state, action) => {
+        state.isLoading = false;
+      })
+      .addCase(ResetForgotPasswordToken.rejected, (state, action) => {
+        state.isLoading = false;
+      })
+
+
+      .addCase(CreateNewPassword.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(CreateNewPassword.fulfilled, (state, action) => {
+        state.isLoading = false;
+      })
+      .addCase(CreateNewPassword.rejected, (state, action) => {
+        state.isLoading = false;
       })
 
   },
 });
 
 export const selectIsLoading = (state: RootState) => state.account.isLoading;
-export const selectError = (state: RootState) => state.account.error;
 export const selectToken = (state: RootState) => state.account.token;
 export const selectEmail = (state: RootState) => state.account.email;
 export const selectusername = (state: RootState) => state.account.username;
@@ -448,6 +516,6 @@ export const selectChangeUsername = (state: RootState) => state.account.newUserN
 export const selectPassword = (state: RootState) => state.account.password;
 
 
-export const {updatePassword,updateEmail,updateusername,changename,removeaddress,anonymousadd, test,updateToken,updateUserId,anonymousUser } = accountSlice.actions;
+export const {changeemail,updatePassword,updateEmail,updateusername,changename,removeaddress,anonymousadd, test,updateToken,updateUserId,anonymousUser } = accountSlice.actions;
 
 export default accountSlice.reducer;
