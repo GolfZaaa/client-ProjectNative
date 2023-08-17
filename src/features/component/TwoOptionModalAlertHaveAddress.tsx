@@ -36,12 +36,14 @@ const TwoOptionModalAlertHaveAddress = ({
             >
               {title}
             </Text>
-            <View style={{  }}>
-              <Text style={{ marginTop: 30,fontSize: 15, color: "gray"}}>
-                Address: {addressuser.value.subDistrict}{" "}{" "}{" "}
-                {addressuser.value.district} 
+            <View >
+              <Text style={{ marginTop: 30,fontSize: 15, color: "gray",left:3}}>
+              You want delivery to: SubDistrict {addressuser.value.subDistrict},{" "}{" "}{" "}
+                
               </Text>
-              <Text style={{fontSize: 15, color: "gray"}}>{addressuser.value.province}{" "}{" "}{" "} {addressuser.value.postalCode}</Text>
+              <Text style={{fontSize: 15, color: "gray"}}> District {addressuser.value.district},  Province {addressuser.value.province},{" "}{" "}{" "}</Text>
+              <Text style={{fontSize: 15, color: "gray"}}> PostalCode {addressuser.value.postalCode}, Thailand</Text>
+           
             </View>
             <View
               style={{

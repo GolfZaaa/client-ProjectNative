@@ -9,6 +9,8 @@ import Address from "../features/account/address";
 import OrderScreen from "../features/checkout/OrderScreen";
 import ForgotPasswordScreen from "../features/account/ForgotPasswordScreen";
 import SettingScreen from "../features/account/EditSettingUserScreen";
+import EditAddressScreen from "../features/order/ConfirmyourOrder";
+import ConfirmyourOrder from "../features/order/ConfirmyourOrder";
 
 const Stack = createNativeStackNavigator();
 
@@ -30,17 +32,30 @@ const StackProduct = () => {
         component={SettingUser}
         options={{ headerShown: false }}
       />
-      <Stack.Screen
-        name="createaddress"
-        component={Address}
-        options={{ headerShown: false }}
-      />
+
       <Stack.Screen
         name="orders"
         component={OrderScreen}
         options={{ headerShown: false }}
       />
-      
+
+      <Stack.Screen
+        name="createaddress"
+        component={Address}
+        options={{ headerShown: false }}
+      />
+
+<Stack.Screen
+              name="EditAddressScreen"
+              component={EditAddressScreen}
+              options={{ headerShown: false }}
+            />
+            
+            <Stack.Screen
+              name="ConfirmyourOrder"
+              component={ConfirmyourOrder}
+              options={{ headerShown: false }}
+            />
     </Stack.Navigator>
   );
 };

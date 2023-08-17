@@ -8,8 +8,8 @@ import {
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { selectCartItems, updateCart } from "../cart/cartSlice";
-import { CreateOrderUser, selectorder } from "../order/orderSlice";
-import { GetAddressUser, selectuserid } from "../account/accountSlice";
+import { CreateOrderUser, GetOrderUser, selectorder } from "../order/orderSlice";
+import { GetAddressUser, selectuserid, selectusername } from "../account/accountSlice";
 import Lottie from "lottie-react-native";
 import { AnyAction } from "@reduxjs/toolkit";
 import { initPaymentSheet, presentPaymentSheet } from "@stripe/stripe-react-native";
@@ -19,34 +19,43 @@ const OrderScreen = ({navigation}:any) => {
   const userId = useSelector(selectuserid);
   const cart: any = useSelector(selectCartItems);
   const order = useSelector(selectorder);
+  const username = useSelector(selectusername);
   // order.length - 1 คือไปที่ array ลำดับสุดท้าย 
-  const latestOrder =  order[order.length - 1] ;
-  const latestClientSecret =  latestOrder.clientSecret ;
-  console.log("ClientSecret", order[0]);
-  console.log("latestClientSecret", latestClientSecret);
+  
+  //ส่วนนี้จะใช้ไม่ได้ เพราะ ถ้า เมื่อ database ยังไม่มีข้อมูลจะหาตัวสุดท้ายไม่เจอจะขึ้น clientSecret' undefined ซึ่งจะ Error Start
+  // ต้องให้ถ้ามีข้อมูลให้ order.length - 1 แต่ถ้าไม่มีให้เป็น null ถึงจะไม่ Error
+  // const latestOrder =  order[order.length - 1] ;
+  // const latestClientSecret =  latestOrder.clientSecret ;
+  //ส่วนนี้จะใช้ไม่ได้ เพราะ ถ้า เมื่อ database ยังไม่มีข้อมูลจะหาตัวสุดท้ายไม่เจอจะขึ้น clientSecret' undefined End
+
+
+  console.log("order",order)
+  // const latestOrder = order.length > 0 ? order[order.length - 1] : null;
+  // const latestClientSecret = latestOrder ? latestOrder.clientSecret : null;
+
+  // const latestOrder = order.length > 0 ? order[order.length - 1] : {};
+  // const latestClientSecret = latestOrder.clientSecret || null;
+  
+  // console.log("ClientSecret", latestOrder);
+  // console.log("latestClientSecret", latestClientSecret);
   
   const [showModal, setShowModal] = useState(false);
 
   const CreateOrder = async (id: any) => {
-    await dispatch(CreateOrderUser({ userId }) as any);
+    const check = await dispatch(CreateOrderUser({ userId }) as any);
     await dispatch(updateCart(null));
-    // await dispatch(GetAddressUser({ userId }) as unknown as AnyAction)
-    // Alert.alert('I goof', 'My Alert Msg', [
-    //   {
-    //     text: 'Cancel',
-    //     onPress: () => console.log('Cancel Pressed'),
-    //     style: 'cancel',
-    //   },
-    //   {text: 'OK', onPress: () => handleConfirmPayment()},
-    // ]);
-    handleConfirmPayment();
+    console.log("check",check.payload.clientSecret)
+    handleConfirmPayment(check.payload.clientSecret);
   };
  
-  const handleConfirmPayment = async () => {
+  const handleConfirmPayment = async (clientSecret:any) => {
     try {
       const { error } = await initPaymentSheet({
-        paymentIntentClientSecret: latestClientSecret,
+        paymentIntentClientSecret: clientSecret,
         merchantDisplayName: "Admin", 
+        defaultBillingDetails : {
+          name: "Test",
+        }
       });
 
       const { paymentOption } = await presentPaymentSheet();
@@ -57,8 +66,8 @@ const OrderScreen = ({navigation}:any) => {
       } else {
         // Payment is successful, update the order status as "success"
         console.log("Payment successful. Payment Method ID:", paymentOption);
-        // Implement your code to update the order status as "success" here
         navigation.navigate("homeproduct" as never);
+        setShowModal(true);
       }
     } catch (e: any) {
       console.error("Payment confirmation failed:", e.message);
@@ -66,7 +75,30 @@ const OrderScreen = ({navigation}:any) => {
     }
   };
   
-  console.log(cart);
+  // trips Started
+  // ส่วนนี้จะเป็นการใช้ useEffect ในการเปลี่ยนค่าของ order โดยจะใช้ค่า showModal(false) ที่มีค่าตั้งต้นเป็น false ในการรี 
+  // เมื่อ useEffect มีการ if ถ้ามี showModal จะนำค่า fetchData มาใช้ โดยข้างในจะมี setShowModal(true);
+  // ซึ่งจะเป็นการเปลี่ยนค่า เพื่อทำการรี order ที่ทำการ dispatch มานั้นเอง
+
+  useEffect(() => {
+    if (showModal) {
+      fetchData();
+    }
+  }, [showModal]);
+
+  const fetchData = async () => {
+    try {
+      await dispatch(GetOrderUser({ username: username }) as any);
+      setShowModal(true); 
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // trips End
+
+  
+  console.log("cart",cart);
   return (
     <View style={{ backgroundColor: "#fff", flex: 1 }}>
       <Text

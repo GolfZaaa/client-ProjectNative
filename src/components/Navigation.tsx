@@ -49,9 +49,13 @@ import ForgotPasswordScreen from "../features/account/ForgotPasswordScreen";
 import CheckyouEmailScreen from "../features/account/CheckyouEmailScreen";
 import CreateNewPasswordScreen from "../features/account/CreateNewPasswordScreen";
 import InPutOTPForgotPasswordScreen from "../features/account/ConfirmOTPForgotPasswordScreen";
-import { GetOrderUser } from "../features/order/orderSlice";
+import { GetOrderUser, selectorder } from "../features/order/orderSlice";
 import StackSetting from "./StackSetting";
 import SettingScreen from "../features/account/EditSettingUserScreen";
+import AddNewAddressScreen from "../features/account/AddNewAddressScreen";
+import EditAddressScreen from "../features/order/ConfirmyourOrder";
+import ConfirmyourAddress from "../features/order/ConfirmyourOrder";
+import ConfirmyourOrder from "../features/order/ConfirmyourOrder";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -68,6 +72,7 @@ const Navigation = () => {
   const username = useSelector(selectusername);
   const email = useSelector(selectEmail);
   const password = useSelector(selectPassword);
+  const order = useSelector(selectorder);
 
   useEffect(() => {
     (async () => {
@@ -102,8 +107,8 @@ const Navigation = () => {
     fetchData();
   }, [userId, username]);
 
-  console.log(username);
-  console.log(email);
+  // console.log(username);
+  // console.log(email);
 
   const products = useSelector(selectProducts);
 
@@ -112,23 +117,8 @@ const Navigation = () => {
       <Stack.Navigator>
         {!token && !anonymous ? (
           <>
-            {/* <Stack.Screen
-              name="testSettings"
-              component={StackSetting}
-              options={{ headerShown: false }}
-            /> */}
 
-            {/* <Stack.Screen
-              name="test"
-              component={address}
-              options={{ headerShown: false }}
-            /> */}
-            {/* 
-            <Stack.Screen
-              name="createaddress"
-              component={Address}
-              options={{ headerShown: false }}
-            /> */}
+    
 
             <Stack.Screen
               name="Onboarding"
@@ -177,6 +167,9 @@ const Navigation = () => {
               component={ForgotPasswordScreen}
               options={{ headerShown: false }}
             />
+
+               
+      
           </>
         ) : (
           <Stack.Screen name="homeproduct" options={{ headerShown: false }}>

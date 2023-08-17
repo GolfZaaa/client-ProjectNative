@@ -11,6 +11,7 @@ import { useDispatch } from "react-redux";
 import { Ionicons } from "@expo/vector-icons";
 import Lottie from 'lottie-react-native';
 import { ConfirmOtpPassword, ResetForgotPasswordToken } from "./accountSlice";
+import { LinearGradient } from "expo-linear-gradient";
 
 const ConfirmOTPForgotPasswordScreen = ({ route, navigation }: any) => {
 
@@ -41,7 +42,7 @@ const ConfirmOTPForgotPasswordScreen = ({ route, navigation }: any) => {
     setOtp3(latestOtpValue[2]);
     setOtp4(latestOtpValue[3]);
 
-    const backgroundColor = text.length === 0 ? "#fff" : "#039fdd";
+    const backgroundColor = text.length === 0 ? "#fff" : "#01b3fa";
 
     inputRefs[index]?.current?.setNativeProps({
       style: { ...styles.otpInput, backgroundColor },
@@ -78,13 +79,16 @@ const ConfirmOTPForgotPasswordScreen = ({ route, navigation }: any) => {
       //   alert("Token wrong.");
       // }
       
-        if(asd.payload.message === "Confirmed token successfully go to ResetPassword.")
+        if(asd.payload?.message === "Confirmed token successfully go to ResetPassword.")
         {
         alert("Completed To Confirm Email for forgotpassword ")
         navigation.navigate("CreateNewPassword",{email});
+        }else{
+        alert("Token wrong.");
+
         }
 
-      console.log("😊😊",asd.payload.message)
+      console.log("😊😊",asd.error.message)
   };
 
   console.log("params",email)
@@ -128,14 +132,9 @@ const ConfirmOTPForgotPasswordScreen = ({ route, navigation }: any) => {
 
 
       <View style={styles.container}>
+      <Text style={styles.title}>Confirm Password</Text>
         <Text style={styles.description}>
-          Enter the verification code we 
-        </Text>
-        <Text style={styles.description}>
-        just sent you on your email 
-        </Text>
-        <Text style={styles.description}>
-        address.
+          Please enter your email address and click the button below to confirm.
         </Text>
         <View style={styles.otpContainer}>
           <TextInput
@@ -182,14 +181,34 @@ const ConfirmOTPForgotPasswordScreen = ({ route, navigation }: any) => {
         onPress={ResendEmail}
         disabled={ResendButtonDisabled} 
       >
-        <Text style={{ fontSize: 15, fontWeight: '800', color: ResendButtonDisabled ? '#ccc' : '#9617af' }}>
+        <Text style={{ fontSize: 15, fontWeight: '800', color: ResendButtonDisabled ? '#ccc' : '#0533ff' }}>
           {ResendButtonDisabled ? `RESENDING... (${TimeResend}s)` : 'RESEND OTP'}
         </Text>
       </TouchableOpacity>
         </View>
 
-        <TouchableOpacity style={styles.button} onPress={handleConfirm}>
-          <Text style={styles.buttonText}>VERIFY & PROCEED</Text>
+        <TouchableOpacity  onPress={handleConfirm}>
+        <LinearGradient
+          style={{
+            borderRadius: 10,
+            alignItems: "center",
+            width: 330,
+          }}
+          colors={["#d139ff", "#38d0ff"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+        >
+          <Text
+            style={{
+              color: "white",
+              fontSize: 20,
+              fontWeight: "500",
+              padding: 12,
+            }}
+          >
+            VERIFY & PROCEED
+          </Text>
+        </LinearGradient>
         </TouchableOpacity>
       </View>
     </View>
@@ -211,10 +230,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   description: {
-    fontSize: 21,
+    fontSize: 16,
     textAlign: "center",
-    fontWeight:'500',
-    marginBottom:2
   },
   otpContainer: {
     flexDirection: "row",
@@ -236,7 +253,7 @@ const styles = StyleSheet.create({
 
   },
   button: {
-    backgroundColor: "#ad42f5",
+    backgroundColor: "#00c0fa",
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 5,
@@ -261,13 +278,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#f51616",
   },
   lottie:{
-    width:180,
-    height:180,
+    width:240,
+    height:240,
 },
 lottieContainer: {
   justifyContent: 'center',
   alignItems: 'center',
-  paddingBottom:50,
-  paddingTop:20
 },
 })

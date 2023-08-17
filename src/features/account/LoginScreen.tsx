@@ -28,6 +28,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AddressSheet } from "@stripe/stripe-react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
+import { Feather } from '@expo/vector-icons';
+import { EvilIcons } from "@expo/vector-icons";
 
 const LoginScreen = ({ navigation }: any) => {
   const isLoading = useSelector(selectIsLoading);
@@ -239,7 +241,7 @@ const LoginScreen = ({ navigation }: any) => {
                 height: 60,
               }}
             >
-              <FontAwesome5 name="user-alt" size={24} color="gray" />
+            <Feather name="user" size={25} color="gray" />
               <TextInput
                 placeholder="Username"
                 value={username}
@@ -266,7 +268,13 @@ const LoginScreen = ({ navigation }: any) => {
           height: 60,
         }}
       >
-        <MaterialIcons name="lock" size={28} color="gray" />
+     {/* <EvilIcons
+            name="lock"
+            size={40}
+            color="gray"
+            style={{right:5,bottom:4}}
+          /> */}
+          <Feather name="lock" size={24} style={{left:2}} color="gray" />
         <TextInput
           placeholder="Password"
           value={password}
@@ -276,7 +284,8 @@ const LoginScreen = ({ navigation }: any) => {
             flex: 1,
             fontSize: 15,
             fontWeight: "500",
-            marginLeft: 10,
+            paddingLeft: 13,
+
           }}
         />
         {password.length > 0 && (

@@ -18,6 +18,8 @@ interface OrderState {
   totalAmount : number;
   order:Order[]
   address:any
+  PaymentMethod : number;
+  orderImage : any;
 }
 
 const initialState: OrderState = {
@@ -27,6 +29,8 @@ const initialState: OrderState = {
   totalAmount: 0,
   order: [],
   address:"",
+  PaymentMethod : 0,
+  orderImage : "",
 };
 
 
@@ -34,12 +38,14 @@ export const CreateOrderUser = createAsyncThunk(
     "CartUser/CreateOrder",
     async ({
       userId,
+      PaymentMethod,
+      orderImage
     }: {
-      userId: string;
+      userId: string; PaymentMethod : number; orderImage : any;
     }) => {
       try {
         const response = await agent.OrderUser.CreateOrder({
-          userId,
+          userId,PaymentMethod,orderImage
         });
         return response;
       } catch (error) {
@@ -105,6 +111,7 @@ const orderSlice = createSlice({
 });
 
 export const selectorder = (state: any) => state.order.order;
+export const selectOrderImage = (state: any) => state.order.orderImage;
 
 
 export default orderSlice.reducer;

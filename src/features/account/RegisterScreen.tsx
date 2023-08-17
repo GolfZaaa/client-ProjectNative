@@ -12,16 +12,12 @@ import {
 } from "react-native";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  anonymousadd,
-  registerAsync,
-  selectError,
-  selectIsLoading,
-} from "./accountSlice";
+import { anonymousadd, registerAsync, selectIsLoading } from "./accountSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 
 const RegisterScreen = ({ navigation }: any) => {
   const [email, setEmail] = useState("");
@@ -34,38 +30,34 @@ const RegisterScreen = ({ navigation }: any) => {
   const rotateValue = new Animated.Value(0);
 
   const isLoading = useSelector(selectIsLoading);
-  const error = useSelector(selectError);
   const imagelogo = require("../../../assets/iconlogin.png");
   const dispatch = useDispatch();
 
   const handleregister = async () => {
     if (email === "" || role === "" || username === "" || password === "") {
       // หากมีค่าว่างในอย่างใดอย่างหนึ่ง ไม่ทำอะไรและออกจากฟังก์ชัน
-      alert("Please provide your complete Email, UserName, and Password.")
+      alert("Please provide your complete Email, UserName, and Password.");
       return;
     }
 
- const test = await  dispatch(
+    const test = await dispatch(
       registerAsync({ email, role, username, password }) as any
-    )
-    if(test?.payload?.value.message === "This e-mail has already been used.")
-    {
-      alert("This e-mail has already been used.")
+    );
+    if (test?.payload?.value.message === "This e-mail has already been used.") {
+      alert("This e-mail has already been used.");
       return;
     }
-    if(test?.payload?.value.message === "Create Successfully")
-    {
-      alert("Register Create Successfully")
+    if (test?.payload?.value.message === "Create Successfully") {
+      alert("Register Create Successfully");
       navigation.navigate("confirmemail", { email });
     }
-    console.log("Register",test.payload.value.message);
+    console.log("Register", test.payload.value.message);
   };
 
   const handleGuestVisit = () => {
     dispatch(anonymousadd());
     AsyncStorage.removeItem("userid");
   };
-
 
   const togglePasswordVisibility = () => {
     setPasswordVisible(!PasswordVisible);
@@ -76,7 +68,6 @@ const RegisterScreen = ({ navigation }: any) => {
       useNativeDriver: false,
     }).start();
   };
-  
 
   const handlePasswordChange = (text: any) => {
     setPassword(text);
@@ -96,11 +87,10 @@ const RegisterScreen = ({ navigation }: any) => {
       }).start();
     }
   };
-  
 
   const iconRotate = rotateValue.interpolate({
     inputRange: [0, 1],
-    outputRange: ['180deg', '0deg'],
+    outputRange: ["180deg", "0deg"],
   });
 
   return (
@@ -129,99 +119,110 @@ const RegisterScreen = ({ navigation }: any) => {
             Register
           </Text>
           <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                paddingHorizontal: 10,
-                marginBottom: 30,
-                backgroundColor: "#b2d1fd",
-                borderRadius: 15,
-                elevation: 15,
-                width: 330,
-                height: 60,
-              }}
-            >
-              <MaterialCommunityIcons name="email" size={28} color="gray" />
-          <TextInput
-            placeholder="Email"
-            value={email}
-            onChangeText={setEmail}
             style={{
-              flex: 1,
-              fontSize: 15,
-              fontWeight: "500",
-              paddingLeft: 13,
+              flexDirection: "row",
+              alignItems: "center",
+              paddingHorizontal: 10,
+              marginBottom: 30,
+              backgroundColor: "#b2d1fd",
+              borderRadius: 15,
+              elevation: 15,
+              width: 330,
+              height: 60,
             }}
-          />
+          >
+            <MaterialCommunityIcons
+              name="email-outline"
+              size={30}
+              style={{ paddingLeft: 3 }}
+              color="gray"
+            />
+            <TextInput
+              placeholder="Email"
+              value={email}
+              onChangeText={setEmail}
+              style={{
+                flex: 1,
+                fontSize: 15,
+                fontWeight: "500",
+                paddingLeft: 13,
+              }}
+            />
           </View>
 
           <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                paddingHorizontal: 10,
-                marginBottom: 30,
-                backgroundColor: "#b2d1fd",
-                borderRadius: 15,
-                elevation: 15,
-                width: 330,
-                height: 60,
-              }}
-            >
-              <View style={{paddingLeft:3}}>
-              <FontAwesome5 name="user-alt" size={24} color="gray" />
-              </View>
-          <TextInput
-            placeholder="Username"
-            value={username}
-            onChangeText={setUsername}
             style={{
-              flex: 1,
-              fontSize: 15,
-              fontWeight: "500",
-              paddingLeft: 13,
+              flexDirection: "row",
+              alignItems: "center",
+              paddingHorizontal: 10,
+              marginBottom: 30,
+              backgroundColor: "#b2d1fd",
+              borderRadius: 15,
+              elevation: 15,
+              width: 330,
+              height: 60,
             }}
-          />
+          >
+            <View style={{ paddingLeft: 3 }}>
+              <Feather name="user" size={30} color="gray" />
+            </View>
+            <TextInput
+              placeholder="Username"
+              value={username}
+              onChangeText={setUsername}
+              style={{
+                flex: 1,
+                fontSize: 15,
+                fontWeight: "500",
+                paddingLeft: 13,
+              }}
+            />
           </View>
 
           <View
-      style={{
-        flexDirection: "row",
-        alignItems: "center",
-        paddingHorizontal: 10,
-        marginBottom: 20,
-        backgroundColor: "#b2d1fd",
-        borderRadius: 15,
-        elevation: 15,
-        width: 330,
-        height: 60,
-      }}
-    >
-      <MaterialIcons name="lock" size={30} color="gray" />
-      <TextInput
-        placeholder="Password"
-        value={password}
-        onChangeText={handlePasswordChange}
-        secureTextEntry={!PasswordVisible}
-        style={{
-          flex: 1,
-          fontSize: 15,
-          fontWeight: "500",
-          paddingLeft: 13,
-        }}
-      />
-      {password.length > 0 && (
-        <TouchableOpacity onPress={togglePasswordVisibility}>
-            <Animated.View style={{ transform: [{ rotate: iconRotate }] }}>
-          <MaterialIcons
-                name={PasswordVisible ? "visibility-off" : "visibility"}
-            size={24}
-            color="gray"
-          />
-            </Animated.View>
-        </TouchableOpacity>
-      )}
-    </View>
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              paddingHorizontal: 10,
+              marginBottom: 20,
+              backgroundColor: "#b2d1fd",
+              borderRadius: 15,
+              elevation: 15,
+              width: 330,
+              height: 60,
+            }}
+          >
+            <Feather
+              name="lock"
+              size={29}
+              style={{ paddingLeft: 4 }}
+              color="gray"
+            />
+
+            <TextInput
+              placeholder="Password"
+              value={password}
+              onChangeText={handlePasswordChange}
+              secureTextEntry={!PasswordVisible}
+              style={{
+                flex: 1,
+                fontSize: 15,
+                fontWeight: "500",
+                paddingLeft: 13,
+              }}
+            />
+            {password.length > 0 && (
+              <TouchableOpacity onPress={togglePasswordVisibility}>
+                <Animated.View style={{ transform: [{ rotate: iconRotate }] }}>
+                  <MaterialIcons
+                    name={PasswordVisible ? "visibility-off" : "visibility"}
+                    size={24}
+                    color="gray"
+                  />
+                </Animated.View>
+              </TouchableOpacity>
+            )}
+          </View>
 
           <TouchableOpacity
             onPress={handleregister}

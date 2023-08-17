@@ -1,42 +1,36 @@
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React from "react";
 import { Ionicons } from "@expo/vector-icons";
-import { FontAwesome5 } from "@expo/vector-icons";
-import { AntDesign } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import EditSettingUserScreen from "../features/account/EditSettingUserScreen";
-import SettingScreen from "../features/account/SettingScreen";
-import EditAddressScreen from "../features/order/ConfirmyourOrder";
 
-const Stack = createNativeStackNavigator();
-
-const StackSetting = ({ navigation }: any) => {
+const AddNewAddressScreen = ({ navigation }: any) => {
   return (
-    <Stack.Navigator>
-      <Stack.Screen
-        name="Settings"
-        component={SettingScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="EditSettingUserScreen"
-        component={EditSettingUserScreen}
-        options={{ headerShown: false }}
-      />
-               
-    </Stack.Navigator>
-   
+    <View style={{ flex: 1, backgroundColor: "#fff" }}>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Ionicons
+            name="arrow-back"
+            size={28}
+            color="black"
+            style={{ marginRight: 5 }}
+          />
+        </TouchableOpacity>
+        <Text style={{ fontSize: 23, fontWeight: "500" }}>Add New Address</Text>
+      </View>
+
+      
+    </View>
   );
 };
 
-export default StackSetting;
+export default AddNewAddressScreen;
 
 const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
-    marginTop: 10,
+    alignItems: "center",
+    marginTop: 30,
     marginBottom: 20,
+    paddingLeft: 20,
   },
   itemContainer: {
     borderBottomWidth: 1,

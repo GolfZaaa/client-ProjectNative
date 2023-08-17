@@ -60,6 +60,7 @@ const EditSettingUserScreen = ({navigation}:any) => {
   const userId = useSelector(selectuserid);
   console.log(userId)
 
+
   const ChangeName = async () => {
     try {
       if (newUserName === "") {
@@ -79,7 +80,7 @@ const EditSettingUserScreen = ({navigation}:any) => {
           handleCloseModal();
           dispatch(changename(newUserName));
           fetchData(newUserName);
- 
+          alert("UserName changed successfully")
         } else {
           alert("Username is already taken.");
           dispatch(changename(username));
@@ -137,12 +138,20 @@ const EditSettingUserScreen = ({navigation}:any) => {
   };
 
   const ChangePassword = async () => {
-    await dispatch(
+    const passwordcheck = await dispatch(
       ChangePasswordUser({
         userId: userId,
         newPassword: newPassword,
       }) as any
     );
+
+    if(passwordcheck.payload.value.message === "Password changed successfully"){
+      alert("Password changed successfully.");
+      handleCloseChangePasswordModal();
+    }else{
+      alert("Failed to change password.");
+    }
+    console.log("passwordcheck",passwordcheck.payload.value.message)
   };
 
   const RemoveUser = async () => {

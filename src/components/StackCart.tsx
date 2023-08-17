@@ -50,9 +50,9 @@ const StackCart = ({ navigation, route, item }: any) => {
   const [isModalVisible, setModalVisible] = useState(false);
   const [ModalVisibleHaveAddress, setModalVisibleHaveAddress] = useState(false);
 
-  console.log("🤷‍♀️", addressuser.statusCode);
-  console.log("😜", cart.items);
-  console.log("addressuser",addressuser.value.subDistrict)
+  // console.log("🤷‍♀️", addressuser.statusCode);
+  // console.log("😜", cart.items);
+  // console.log("addressuser",addressuser.value.subDistrict)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -72,7 +72,6 @@ const StackCart = ({ navigation, route, item }: any) => {
     // await dispatch(CreateOrderUser({ userId }) as any);
     // await dispatch(updateCart(null));
     navigation.navigate("orders");
-
   };
 
   const handleAddress = async (id: any) => {
@@ -81,6 +80,11 @@ const StackCart = ({ navigation, route, item }: any) => {
 
   const handleGotoOrder = async (id: any) => {
     navigation.navigate("orders");
+  };
+
+  const handleGotoEditAddress = async (id: any) => {
+    navigation.navigate("ConfirmyourOrder");
+    setModalVisibleHaveAddress(!ModalVisibleHaveAddress);
 
   };
 
@@ -102,10 +106,7 @@ const StackCart = ({ navigation, route, item }: any) => {
     toggleModal();
   };
 
-  const handleCancelHaveAddress = () => {
-    console.log("Cancelled");
-    toggleModalHaveAddress();
-  };
+
 
   const handleLogout = async () => {
     if (token !== "") {
@@ -327,10 +328,9 @@ const StackCart = ({ navigation, route, item }: any) => {
               >
                 <TwoOptionModalAlertHaveAddress
                   isVisible={ModalVisibleHaveAddress}
-                  onClose={toggleModalHaveAddress}
                   title={"Confirm delivery address"}
                   onConfirm={handleGotoOrder}
-                  onCancel={handleCancelHaveAddress}
+                  onCancel={handleGotoEditAddress}
                 />
               </View>
               </View>

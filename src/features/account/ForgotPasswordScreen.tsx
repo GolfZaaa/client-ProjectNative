@@ -103,7 +103,7 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
             borderRadius: 10,
             alignItems: "center",
           }}
-          colors={["#d139ff", "blue"]}
+          colors={["#d139ff", "#38d0ff"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
         >
