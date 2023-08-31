@@ -14,6 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  selectEmail,
   selectstreet,
   selectuserid,
   selectusername,
@@ -24,9 +25,14 @@ import { Fontisto } from "@expo/vector-icons";
 import { Entypo } from "@expo/vector-icons";
 import RadioInputCreditCard from "../component/RadioInputCreditCard";
 import * as ImagePicker from "expo-image-picker";
-import { CreateOrderUser, GetOrderUser, selectOrderImage } from "./orderSlice";
-import { initPaymentSheet, presentPaymentSheet } from "@stripe/stripe-react-native";
-import * as FileSystem from 'expo-file-system'
+import { CreateOrderUser, GetOrderUser, UpdateOrderStatus, selectOrderImage } from "./orderSlice";
+import {
+  initPaymentSheet,
+  presentPaymentSheet,
+} from "@stripe/stripe-react-native";
+import * as FileSystem from "expo-file-system";
+import { LinearGradient } from "expo-linear-gradient";
+import agent, { UrlFolderOrderImage } from "../api/agent";
 const ConfirmyourOrder = ({ navigation }: any) => {
   const dispatch = useDispatch();
   const username = useSelector(selectusername);
@@ -34,18 +40,21 @@ const ConfirmyourOrder = ({ navigation }: any) => {
   const userId = useSelector(selectuserid);
   const cart: any = useSelector(selectCartItems);
   const orderImage: any = useSelector(selectOrderImage);
+  const UrlImage = agent.UrlFolderOrderImage;
+  const email = useSelector(selectEmail);
 
   const [selectedMethod, setSelectedMethod] = useState(1);
-  const [imageUri, setImageUri]:any = useState(null);
+  const [imageUri, setImageUri]: any = useState(null);
   const [showModal, setShowModal] = useState(false);
+
+  console.log('showModal',showModal)
 
   const [PaymentMethod, setPaymentMethod] = useState(0);
 
-
-  console.log("selectedMethod", selectedMethod);
+  console.log("selectedMethod", showModal);
 
   console.log("cart", cart);
-  
+
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
@@ -58,75 +67,79 @@ const ConfirmyourOrder = ({ navigation }: any) => {
       quality: 1,
     });
 
- if (!result.cancelled) {
+    if (!result.cancelled) {
       let fileInfo = await FileSystem.getInfoAsync(result.assets[0].uri);
       let fileUri = fileInfo.uri;
-      let fileName = fileUri.split('/').pop();
-      let fileType = 'image/jpeg'; 
+      let fileName = fileUri.split("/").pop();
+      let fileType = "image/jpeg";
 
       setImageUri({
         uri: fileUri,
         name: fileName,
         type: fileType,
       });
- }
+    }
 
     console.log("result", result);
   };
-  
-    const CreateOrder = async () => {
+
+  const CreateOrder = async (clientSecret: any) => {
     try {
-      // const orderPayload:any = {
-      //   userId,
-      //   PaymentMethod: selectedMethod,
-      //   orderImage: imageUri, 
-      // };
-      const check = await dispatch(CreateOrderUser({userId,PaymentMethod:selectedMethod, orderImage:imageUri}) as any);
-      await dispatch(updateCart(null));
-      console.log("check", check);
+      const check = await dispatch(
+        CreateOrderUser({
+          userId,
+          PaymentMethod: selectedMethod,
+          orderImage: imageUri,
+        }) as any
+      );
       handleConfirmPayment(check.payload.clientSecret);
+    await dispatch(updateCart(null));
+      console.log(check.meta.arg.PaymentMethod)
+      if(check.meta.arg.PaymentMethod === 0)
+      {
+    navigation.navigate("CheckOutSuccessScreen");
+      }
     } catch (error) {
       console.error("Error creating order:", error);
     }
   };
 
-  console.log(imageUri)
 
- 
-  const handleConfirmPayment = async (clientSecret:any) => {
+
+  console.log(imageUri);
+
+  const handleConfirmPayment = async (clientSecret: any) => {
     try {
-      const { error } = await initPaymentSheet({
+      const { paymentOption } = await initPaymentSheet({
         paymentIntentClientSecret: clientSecret,
-        merchantDisplayName: "Admin", 
-        defaultBillingDetails : {
+        merchantDisplayName: "Admin",
+        defaultBillingDetails: {
           name: "Test",
-        }
+        },
       });
 
-      const { paymentOption } = await presentPaymentSheet();
+      const { error } = await presentPaymentSheet();
 
       if (error) {
-        console.error("Payment confirmation failed:", error.message);
-        // Handle the payment error here
+        console.log("Payment confirmation failed:", error.message);
+        navigation.navigate("CheckOutFailScreen")
       } else {
-        // Payment is successful, update the order status as "success"
         console.log("Payment successful. Payment Method ID:", paymentOption);
-        navigation.navigate("homeproduct" as never);
-        setShowModal(true);
+        setShowModal(false);
+        navigation.navigate("CheckOutSuccessScreen")
       }
     } catch (e: any) {
       console.error("Payment confirmation failed:", e.message);
-      // Handle the payment error here
     }
   };
-  
+
   // trips Started
-  // ส่วนนี้จะเป็นการใช้ useEffect ในการเปลี่ยนค่าของ order โดยจะใช้ค่า showModal(false) ที่มีค่าตั้งต้นเป็น false ในการรี 
+  // ส่วนนี้จะเป็นการใช้ useEffect ในการเปลี่ยนค่าของ order โดยจะใช้ค่า showModal(false) ที่มีค่าตั้งต้นเป็น false ในการรี
   // เมื่อ useEffect มีการ if ถ้ามี showModal จะนำค่า fetchData มาใช้ โดยข้างในจะมี setShowModal(true);
   // ซึ่งจะเป็นการเปลี่ยนค่า เพื่อทำการรี order ที่ทำการ dispatch มานั้นเอง
 
   useEffect(() => {
-    if (showModal) {
+    if (!showModal) {
       fetchData();
     }
   }, [showModal]);
@@ -134,15 +147,11 @@ const ConfirmyourOrder = ({ navigation }: any) => {
   const fetchData = async () => {
     try {
       await dispatch(GetOrderUser({ username: username }) as any);
-      setShowModal(true); 
+      setShowModal(false);
     } catch (error) {
       console.log(error);
     }
   };
-
-  
-
- 
 
   useEffect(() => {
     const fetchData = async () => {
@@ -167,17 +176,14 @@ const ConfirmyourOrder = ({ navigation }: any) => {
   };
 
   const Test = ({ item, i, dispatch }: any) => {
-    const deleteProduct = async (id: any) => {
-      await dispatch(getCartAsync({ userId }));
-    };
 
-    const AddProduct = async (id: any) => {
-      await dispatch(getCartAsync({ userId }));
-    };
+    const productName = item.product.name;
+    const maxLength = 26;
 
-    const DeleteProductAll = async (id: any) => {
-      await dispatch(getCartAsync({ userId }));
-    };
+    let trimmedName = productName;
+    if (productName.length > maxLength) {
+      trimmedName = productName.substring(0, maxLength - 3) + "...";
+    }
 
     return (
       <View
@@ -192,7 +198,7 @@ const ConfirmyourOrder = ({ navigation }: any) => {
               borderRadius: 10,
             }}
             source={{
-              uri: item.product.imageUrls[0],
+              uri: UrlFolderOrderImage + item.product.image,
             }}
           />
 
@@ -215,7 +221,7 @@ const ConfirmyourOrder = ({ navigation }: any) => {
             </Text>
 
             <Text style={{ fontWeight: "400", fontSize: 16 }}>
-              {item.product.name}
+              {trimmedName}
             </Text>
 
             <View
@@ -285,383 +291,410 @@ const ConfirmyourOrder = ({ navigation }: any) => {
   };
 
   return (
-    <ScrollView>
-      <View style={styles.container}>
-        <View style={styles.bottomLinetop}></View>
-        <View style={styles.bottomLinebot}></View>
+    <View>
+      <ScrollView>
+        <View style={styles.container}>
+          <View style={styles.bottomLinetop}></View>
+          <View style={styles.bottomLinebot}></View>
 
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons
-              name="arrow-back"
-              size={28}
-              color="black"
-              style={{ paddingLeft: 20 }}
-            />
-          </TouchableOpacity>
-          <Text
-            style={{
-              flex: 1,
-              fontSize: 20,
-              fontWeight: "600",
-              textAlign: "center",
-              right: 15,
-            }}
-          >
-            Confirm Your Order
-          </Text>
-        </View>
-
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "center",
-            alignItems: "center",
-            paddingBottom: 20,
-          }}
-        >
-          <View
-            style={{
-              alignItems: "center",
-              justifyContent: "center",
-              width: 20,
-              height: 20,
-              backgroundColor: "#b1b1b1",
-              borderRadius: 25,
-            }}
-          >
-            <Text style={{ color: "white", fontSize: 13 }}>1</Text>
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <Ionicons
+                name="arrow-back"
+                size={28}
+                color="black"
+                style={{ paddingLeft: 20 }}
+              />
+            </TouchableOpacity>
+            <Text
+              style={{
+                flex: 1,
+                fontSize: 20,
+                fontWeight: "600",
+                textAlign: "center",
+                right: 15,
+              }}
+            >
+              Confirm Your Order
+            </Text>
           </View>
-          <Text
-            style={{
-              fontSize: 15,
-              marginLeft: 5,
-              fontWeight: "400",
-              color: "#b3b3b3",
-            }}
-          >
-            Set Address
-          </Text>
-          <AntDesign
-            name="right"
-            size={18}
-            style={{ paddingLeft: 10, paddingRight: 10 }}
-            color="#d3d3d3"
-          />
 
           <View
             style={{
-              alignItems: "center",
-              justifyContent: "center",
-              width: 20,
-              height: 20,
-              backgroundColor: "#a500b4",
-              borderRadius: 25,
-            }}
-          >
-            <Text style={{ color: "white", fontSize: 13 }}>2</Text>
-          </View>
-          <Text style={{ fontSize: 15, marginLeft: 5, fontWeight: "500" }}>
-            Confirm Order
-          </Text>
-        </View>
-
-        {/* Address Start */}
-
-        <TouchableOpacity style={{ marginBottom: 20 }}>
-          <View>
-            <View
-              style={{ flexDirection: "row", paddingTop: 15, paddingLeft: 45 }}
-            >
-              <Ionicons name="location-outline" size={24} color="#c807da" />
-              <View style={{ flexDirection: "row", paddingLeft: 10 }}>
-                <Text style={{ fontWeight: "400", fontSize: 18 }}>
-                  {username}{" "}
-                </Text>
-                <Text style={{ fontSize: 18, color: "gray", paddingLeft: 10 }}>
-                  092 572 1318
-                </Text>
-              </View>
-            </View>
-            <View
-              style={{ flexDirection: "row", paddingTop: 5, paddingLeft: 70 }}
-            >
-              <View style={{ flexDirection: "row", paddingLeft: 10 }}>
-                <Text style={{ fontWeight: "400", fontSize: 18 }}>
-                  {addressuser.value.subDistrict}, {addressuser.value.district},{" "}
-                </Text>
-                <AntDesign
-                  name="right"
-                  size={27}
-                  style={{ position: "absolute", paddingLeft: 270, bottom: 3 }}
-                  color="#cfcfcf"
-                />
-              </View>
-            </View>
-            <View
-              style={{ flexDirection: "row", paddingTop: 5, paddingLeft: 70 }}
-            >
-              <View style={{ flexDirection: "row", paddingLeft: 10 }}>
-                <Text style={{ fontWeight: "400", fontSize: 18 }}>
-                  {addressuser.value.province}, {addressuser.value.postalCode}{" "}
-                  ประเทศไทย{" "}
-                </Text>
-              </View>
-            </View>
-          </View>
-        </TouchableOpacity>
-
-        {/* Address End */}
-
-        <View style={{ width: "100%", backgroundColor: "#f3f3f3", height: 8 }}>
-          <Text style={{ color: "rgba(0, 0, 0, 0)" }}>wewe</Text>
-        </View>
-
-        <View style={{ paddingLeft: 28, paddingTop: 20 }}>
-          <Text style={{ fontSize: 17, fontWeight: "500" }}>Item Detail</Text>
-        </View>
-        <View>
-          {cart.items !== null && cart.items !== undefined && (
-            <>
-              {cart.items.map((item: any, i: any) => (
-                <>
-                  <Test key={item.product.id} item={item} dispatch={dispatch} />
-                </>
-              ))}
-            </>
-          )}
-
-          <View
-            style={{
-              marginTop: 20,
-              marginBottom: 20,
               flexDirection: "row",
-              justifyContent: "space-between",
-              paddingLeft: 25,
-              paddingRight: 25,
+              justifyContent: "center",
+              alignItems: "center",
+              paddingBottom: 20,
             }}
           >
-            <Text style={{ color: "#919191", fontWeight: "500", fontSize: 16 }}>
-              Subtotal
+            <View
+              style={{
+                alignItems: "center",
+                justifyContent: "center",
+                width: 20,
+                height: 20,
+                backgroundColor: "#b1b1b1",
+                borderRadius: 25,
+              }}
+            >
+              <Text style={{ color: "white", fontSize: 13 }}>1</Text>
+            </View>
+            <Text
+              style={{
+                fontSize: 15,
+                marginLeft: 5,
+                fontWeight: "400",
+                color: "#b3b3b3",
+              }}
+            >
+              Set Address
             </Text>
-            <Text style={{ color: "#9504d8", fontWeight: "900", fontSize: 16 }}>
-              {" "}
-              ${cart.totalPrice}
+            <AntDesign
+              name="right"
+              size={18}
+              style={{ paddingLeft: 10, paddingRight: 10 }}
+              color="#d3d3d3"
+            />
+
+            <View
+              style={{
+                alignItems: "center",
+                justifyContent: "center",
+                width: 20,
+                height: 20,
+                backgroundColor: "#a500b4",
+                borderRadius: 25,
+              }}
+            >
+              <Text style={{ color: "white", fontSize: 13 }}>2</Text>
+            </View>
+            <Text style={{ fontSize: 15, marginLeft: 5, fontWeight: "500" }}>
+              Confirm Order
             </Text>
           </View>
-          {/* เส้นใหญ่  Start*/}
+
+          {/* Address Start */}
+
+          <TouchableOpacity style={{ marginBottom: 20 }}>
+            <View>
+              <View
+                style={{
+                  flexDirection: "row",
+                  paddingTop: 15,
+                  paddingLeft: 45,
+                }}
+              >
+                <Ionicons name="location-outline" size={24} color="#c807da" />
+                <View style={{ flexDirection: "row", paddingLeft: 10 }}>
+                  <Text style={{ fontWeight: "400", fontSize: 18 }}>
+                    {username}{" "}
+                  </Text>
+                  <Text style={{ fontSize: 18, color: "gray", paddingLeft: 10 }}>
+                {email.length > 10 ? email.substring(0, 19) + "..." : email}
+              </Text>
+
+                </View>
+              </View>
+              <View
+                style={{ flexDirection: "row", paddingTop: 5, paddingLeft: 70 }}
+              >
+                <View style={{ flexDirection: "row", paddingLeft: 10 }}>
+                  <Text style={{ fontWeight: "400", fontSize: 18 }}>
+                    {addressuser.value.subDistrict},{" "}
+                    {addressuser.value.district},{" "}
+                  </Text>
+                  <AntDesign
+                    name="right"
+                    size={27}
+                    style={{
+                      position: "absolute",
+                      paddingLeft: 270,
+                      bottom: 3,
+                    }}
+                    color="#cfcfcf"
+                  />
+                </View>
+              </View>
+              <View
+                style={{ flexDirection: "row", paddingTop: 5, paddingLeft: 70 }}
+              >
+                <View style={{ flexDirection: "row", paddingLeft: 10 }}>
+                  <Text style={{ fontWeight: "400", fontSize: 18 }}>
+                    {addressuser.value.province}, {addressuser.value.postalCode}{" "}
+                    ประเทศไทย{" "}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </TouchableOpacity>
+
+          {/* Address End */}
+
           <View
             style={{ width: "100%", backgroundColor: "#f3f3f3", height: 8 }}
           >
             <Text style={{ color: "rgba(0, 0, 0, 0)" }}>wewe</Text>
           </View>
-          {/* เส้นใหญ่  End*/}
 
-          {/* Payment Methods Start  */}
-          <View style={{ paddingLeft: 25, paddingTop: 20, marginBottom: 20 }}>
-            <Text style={{ fontSize: 17, fontWeight: "600", marginBottom: 10 }}>
-              Payment Methods
-            </Text>
-
-            {/* Pay in full with Start */}
-            <View>
-              <TouchableWithoutFeedback
-                onPress={() => handleMethodSelect(1)}
-              >
-                <View
-                  style={{
-                    paddingLeft: 10,
-                    flexDirection: "row",
-                    marginBottom: 10,
-                  }}
-                >
-                  {/* Assuming RadioInputCreditCard component is used here */}
-                  <RadioInputCreditCard
-                    selected={selectedMethod === 1}
-                    onSelect={() => handleMethodSelect(1)}
-                  />
-                  <Text
-                    style={{
-                      fontSize: 16,
-                      color: "#9b9b9b",
-                      fontWeight: "400",
-                    }}
-                  >
-                    Pay in full with
-                  </Text>
-                </View>
-              </TouchableWithoutFeedback>
-
-              <TouchableWithoutFeedback
-                onPress={() => handleMethodSelect(1)}
-              >
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    width: "85%",
-                    backgroundColor: "#f8f8f8",
-                    height: 65,
-                    borderRadius: 5,
-                    left: 30,
-                    paddingLeft: 20,
-                  }}
-                >
-                  <AntDesign name="creditcard" size={24} color="black" />
-                  <View style={{ flex: 1, paddingLeft: 20 }}>
-                    <View>
-                      <Text style={{ fontWeight: "600", fontSize: 16 }}>
-                        Credit/Debit Card
-                      </Text>
-                    </View>
-                    <Text style={{ fontSize: 15, color: "gray" }}>
-                      VISA ending in 6633
-                    </Text>
-                  </View>
-                </View>
-              </TouchableWithoutFeedback>
-            </View>
-
-            {/* Pay in full with End */}
+          <View style={{ paddingLeft: 28, paddingTop: 20 }}>
+            <Text style={{ fontSize: 17, fontWeight: "500" }}>Item Detail</Text>
+          </View>
+          <View>
+            {cart.items !== null && cart.items !== undefined && (
+              <>
+                {cart.items.map((item: any, i: any) => (
+                  <>
+                    <Test
+                      key={item.product.id}
+                      item={item}
+                      dispatch={dispatch}
+                    />
+                  </>
+                ))}
+              </>
+            )}
 
             <View
               style={{
-                borderWidth: 0.2,
-                borderColor: "#e0e0e0",
-                width: 345,
                 marginTop: 20,
                 marginBottom: 20,
+                flexDirection: "row",
+                justifyContent: "space-between",
+                paddingLeft: 25,
+                paddingRight: 25,
               }}
-            ></View>
-
-            {/* TransferPayment Start */}
-            <View>
-              <TouchableWithoutFeedback
-                onPress={() => handleMethodSelect(0)}
+            >
+              <Text
+                style={{ color: "#919191", fontWeight: "500", fontSize: 16 }}
               >
-                <View
-                  style={{
-                    paddingLeft: 10,
-                    flexDirection: "row",
-                    marginBottom: 10,
-                  }}
-                >
-                  <RadioInputCreditCard
-                    selected={selectedMethod === 0}
-                    onSelect={() => handleMethodSelect(0)}
-                  />
-                  <Text
+                Subtotal
+              </Text>
+              <Text
+                style={{ color: "#9504d8", fontWeight: "900", fontSize: 16 }}
+              >
+                {" "}
+                ${cart.totalPrice}
+              </Text>
+            </View>
+            {/* เส้นใหญ่  Start*/}
+            <View
+              style={{ width: "100%", backgroundColor: "#f3f3f3", height: 8 }}
+            >
+              <Text style={{ color: "rgba(0, 0, 0, 0)" }}>wewe</Text>
+            </View>
+            {/* เส้นใหญ่  End*/}
+
+            {/* Payment Methods Start  */}
+            <View style={{ paddingLeft: 25, paddingTop: 20, marginBottom: 20 }}>
+              <Text
+                style={{ fontSize: 17, fontWeight: "600", marginBottom: 10 }}
+              >
+                Payment Methods
+              </Text>
+
+              {/* Pay in full with Start */}
+              <View>
+                <TouchableWithoutFeedback onPress={() => handleMethodSelect(1)}>
+                  <View
                     style={{
-                      fontSize: 16,
-                      color: "#9b9b9b",
-                      fontWeight: "400",
+                      paddingLeft: 10,
+                      flexDirection: "row",
+                      marginBottom: 10,
                     }}
                   >
-                    Pay in Transfer Payment
-                  </Text>
-                </View>
-              </TouchableWithoutFeedback>
+                    {/* Assuming RadioInputCreditCard component is used here */}
+                    <RadioInputCreditCard
+                      selected={selectedMethod === 1}
+                      onSelect={() => handleMethodSelect(1)}
+                    />
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        color: "#9b9b9b",
+                        fontWeight: "400",
+                      }}
+                    >
+                      Pay in full with
+                    </Text>
+                  </View>
+                </TouchableWithoutFeedback>
 
-              {selectedMethod === 0 && (
-                <>
-                  <TouchableWithoutFeedback
-                    onPress={() => handleMethodSelectImage(0)}
+                <TouchableWithoutFeedback onPress={() => handleMethodSelect(1)}>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      width: "85%",
+                      backgroundColor: "#f8f8f8",
+                      height: 65,
+                      borderRadius: 5,
+                      left: 30,
+                      paddingLeft: 20,
+                    }}
                   >
-                    <View style={{ paddingLeft: 35 }}>
-                      <View
-                        style={{
-                          flexDirection: "row",
-                          alignItems: "center",
-                          width: "93%",
-                          backgroundColor: "#f8f8f8",
-                          height: 65,
-                          borderRadius: 5,
-                          paddingLeft: 20,
-                          marginBottom: 10,
-                        }}
-                      >
-                        <AntDesign name="file1" size={24} color="black" />
-                        <View style={{ flex: 1, paddingLeft: 20 }}>
-                          <View>
-                            <Text style={{ fontWeight: "600", fontSize: 16 }}>
-                              Upload Receipt
-                            </Text>
-                          </View>
-                          <Text style={{ fontSize: 15, color: "gray" }}>
-                            Click to upload a receipt image
-                          </Text>
-                        </View>
+                    <AntDesign name="creditcard" size={24} color="black" />
+                    <View style={{ flex: 1, paddingLeft: 20 }}>
+                      <View>
+                        <Text style={{ fontWeight: "600", fontSize: 16 }}>
+                          Credit/Debit Card
+                        </Text>
                       </View>
+                      <Text style={{ fontSize: 15, color: "gray" }}>
+                        VISA ending in 6633
+                      </Text>
                     </View>
-                  </TouchableWithoutFeedback>
+                  </View>
+                </TouchableWithoutFeedback>
+              </View>
 
-                  <TouchableWithoutFeedback
-                    onPress={() => handleMethodSelectImage(0)}
+              {/* Pay in full with End */}
+
+              {/* เส้นเล็ก Start */}
+              <View
+                style={{
+                  borderWidth: 0.2,
+                  borderColor: "#e0e0e0",
+                  width: 345,
+                  marginTop: 20,
+                  marginBottom: 20,
+                }}
+              ></View>
+              {/* เส้นเล็ก End */}
+
+              {/* TransferPayment Start */}
+              <View>
+                <TouchableWithoutFeedback onPress={() => handleMethodSelect(0)}>
+                  <View
+                    style={{
+                      paddingLeft: 10,
+                      flexDirection: "row",
+                      marginBottom: 10,
+                    }}
                   >
-                    <View>
-                      <TouchableOpacity onPress={pickImage}>
+                    <RadioInputCreditCard
+                      selected={selectedMethod === 0}
+                      onSelect={() => handleMethodSelect(0)}
+                    />
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        color: "#9b9b9b",
+                        fontWeight: "400",
+                      }}
+                    >
+                      Pay in Transfer Payment
+                    </Text>
+                  </View>
+                </TouchableWithoutFeedback>
+
+                {selectedMethod === 0 && (
+                  <>
+                    <TouchableWithoutFeedback
+                      onPress={() => handleMethodSelectImage(0)}
+                    >
+                      <View style={{ paddingLeft: 35 }}>
                         <View
                           style={{
-                            flex: 1,
+                            flexDirection: "row",
                             alignItems: "center",
-                            justifyContent: "center",
+                            width: "93%",
+                            backgroundColor: "#f8f8f8",
+                            height: 65,
+                            borderRadius: 5,
+                            paddingLeft: 20,
+                            marginBottom: 10,
                           }}
                         >
-                          {imageUri && (
-                            <Image
-                              source={{ uri: imageUri.uri }}
-                              style={{
-                                width: 200,
-                                height: 200,
-                                marginBottom: 20,
-                              }}
-                            />
-                          )}
+                          <AntDesign name="file1" size={24} color="black" />
+                          <View style={{ flex: 1, paddingLeft: 20 }}>
+                            <View>
+                              <Text style={{ fontWeight: "600", fontSize: 16 }}>
+                                Upload Receipt
+                              </Text>
+                            </View>
+                            <Text style={{ fontSize: 15, color: "gray" }}>
+                              Click to upload a receipt image
+                            </Text>
+                          </View>
                         </View>
-                      </TouchableOpacity>
-                    </View>
-                  </TouchableWithoutFeedback>
-                </>
-              )}
+                      </View>
+                    </TouchableWithoutFeedback>
+
+                    <TouchableWithoutFeedback
+                      onPress={() => handleMethodSelectImage(0)}
+                    >
+                      <View>
+                        <TouchableOpacity onPress={pickImage}>
+                          <View
+                            style={{
+                              flex: 1,
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            {imageUri && (
+                              <Image
+                                source={{ uri: imageUri.uri }}
+                                style={{
+                                  width: 200,
+                                  height: 200,
+                                  marginBottom: 20,
+                                }}
+                              />
+                            )}
+                          </View>
+                        </TouchableOpacity>
+                      </View>
+                    </TouchableWithoutFeedback>
+                  </>
+                )}
+              </View>
+
+              {/* TransferPayment End */}
             </View>
 
-            {/* TransferPayment End */}
+            {/* Payment Methods End  */}
           </View>
 
-          {/* Payment Methods End  */}
-        </View>
-
-        {/* เส้นใหญ่ */}
-
-        <View style={{ width: "100%", backgroundColor: "#f3f3f3", height: 8 }}>
-          <Text style={{ color: "rgba(0, 0, 0, 0)" }}>wewe</Text>
-        </View>
-
-        <View style={{ paddingLeft: 30, paddingTop: 20, marginBottom: 200 }}>
-          <Text style={{ fontWeight: "700", fontSize: 17 }}>
-            Have a Coupon?
-          </Text>
+          {/* เส้นใหญ่ */}
 
           <View
-            style={{
-              width: 270,
-              height: 40,
-              backgroundColor: "#e2e2e2",
-              marginTop: 10,
-              borderRadius: 5,
-            }}
+            style={{ width: "100%", backgroundColor: "#f3f3f3", height: 8 }}
           >
-            <TextInput
-              style={{ flex: 1, paddingHorizontal: 10, color: "white" }}
-              placeholder="Enter promo code"
-              placeholderTextColor="gray"
-            />
+            <Text style={{ color: "rgba(0, 0, 0, 0)" }}>wewe</Text>
           </View>
-        </View>
 
-        <Button title="Button" onPress={CreateOrder}  />
-      </View>
-    </ScrollView>
+  
+
+          <TouchableOpacity
+            style={{
+              width: "90%",
+              height: 50,
+              marginLeft: 20,
+              marginTop:40,
+              marginBottom:40
+            }}
+            onPress={CreateOrder}
+          >
+            <LinearGradient
+              style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+                borderRadius: 15,
+              }}
+              colors={["#c109c7", "#ff00bf"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+            >
+              <Text style={{ fontSize: 20, fontWeight: "700", color: "#fff" }}>
+                Submit Order (${cart.totalPrice})
+              </Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </View>
   );
 };
 

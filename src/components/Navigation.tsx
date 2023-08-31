@@ -21,6 +21,7 @@ import {
   selectusername,
   updateEmail,
   updatePassword,
+  updateProfileImage,
   updateToken,
   updateUserId,
   updateusername,
@@ -51,11 +52,7 @@ import CreateNewPasswordScreen from "../features/account/CreateNewPasswordScreen
 import InPutOTPForgotPasswordScreen from "../features/account/ConfirmOTPForgotPasswordScreen";
 import { GetOrderUser, selectorder } from "../features/order/orderSlice";
 import StackSetting from "./StackSetting";
-import SettingScreen from "../features/account/EditSettingUserScreen";
-import AddNewAddressScreen from "../features/account/AddNewAddressScreen";
-import EditAddressScreen from "../features/order/ConfirmyourOrder";
-import ConfirmyourAddress from "../features/order/ConfirmyourOrder";
-import ConfirmyourOrder from "../features/order/ConfirmyourOrder";
+import EditSettingUserScreen from "../features/account/EditSettingUserScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -117,9 +114,6 @@ const Navigation = () => {
       <Stack.Navigator>
         {!token && !anonymous ? (
           <>
-
-    
-
             <Stack.Screen
               name="Onboarding"
               component={StackOnboard}
@@ -167,9 +161,6 @@ const Navigation = () => {
               component={ForgotPasswordScreen}
               options={{ headerShown: false }}
             />
-
-               
-      
           </>
         ) : (
           <Stack.Screen name="homeproduct" options={{ headerShown: false }}>
@@ -221,7 +212,7 @@ const Navigation = () => {
 
                 <Tab.Screen
                   name="Setting"
-                  component={StackSetting}
+                  component={EditSettingUserScreen}
                   initialParams={products}
                   options={{
                     headerShown: false,

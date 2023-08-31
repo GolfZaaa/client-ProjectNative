@@ -25,6 +25,7 @@ import {
   removeaddress,
   selectEmail,
   selectPassword,
+  selectanonymous,
   selectuserid,
   selectusername,
   updateEmail,
@@ -37,7 +38,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { updateCart } from "../cart/cartSlice";
 import { LinearGradient } from "expo-linear-gradient";
 
-const EditSettingUserScreen = ({navigation}:any) => {
+const EditSettingUserScreen = ({ navigation }: any) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isNewEmailModalVisible, setIsNewEmailModalVisible] = useState(false);
   const [data, setData] = useState(null);
@@ -46,7 +47,7 @@ const EditSettingUserScreen = ({navigation}:any) => {
   const [isModalRemoveaccount, setisModalRemoveaccount] = useState(false);
   const modalBackgroundColor = useState(new Animated.Value(0))[0];
   const newEmailModalBackgroundColor = useState(new Animated.Value(0))[0];
-
+  const anonymous = useSelector(selectanonymous);
   const username = useSelector(selectusername);
   const email = useSelector(selectEmail);
 
@@ -58,8 +59,28 @@ const EditSettingUserScreen = ({navigation}:any) => {
   const [isPressed, setIsPressed] = useState(false);
   const dispatch = useDispatch();
   const userId = useSelector(selectuserid);
-  console.log(userId)
+  console.log(userId);
 
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.multiRemove([
+        "token",
+        "userId",
+        "anonymous",
+        "username",
+        "email",
+      ]);
+      dispatch(updateToken(null));
+      dispatch(anonymousUser(false));
+      dispatch(updateUserId(null));
+      dispatch(removeaddress(null));
+      dispatch(updateusername(null));
+      dispatch(updateCart(null));
+      dispatch(updateEmail(null));
+    } catch (error) {
+      console.log("Error removing token:", error);
+    }
+  };
 
   const ChangeName = async () => {
     try {
@@ -69,7 +90,7 @@ const EditSettingUserScreen = ({navigation}:any) => {
         return;
       }
       if (username !== newUserName) {
-        const asd:any = await dispatch(
+        const asd: any = await dispatch(
           ChangeNameUser({
             userId: userId,
             username: username,
@@ -80,13 +101,13 @@ const EditSettingUserScreen = ({navigation}:any) => {
           handleCloseModal();
           dispatch(changename(newUserName));
           fetchData(newUserName);
-          alert("UserName changed successfully")
+          alert("UserName changed successfully");
         } else {
           alert("Username is already taken.");
           dispatch(changename(username));
           fetchData(newUserName);
         }
-    console.log("Username",asd)
+        console.log("Username", asd);
       } else {
         alert("Please enter a different Username.");
       }
@@ -123,7 +144,6 @@ const EditSettingUserScreen = ({navigation}:any) => {
           handleCloseNewEmailModal();
           dispatch(changeemail(newEmail));
           fetchData(newEmail);
- 
         } else {
           alert("Email is already taken.");
           dispatch(changeemail(email));
@@ -145,19 +165,26 @@ const EditSettingUserScreen = ({navigation}:any) => {
       }) as any
     );
 
-    if(passwordcheck.payload.value.message === "Password changed successfully"){
+    if (
+      passwordcheck.payload.value.message === "Password changed successfully"
+    ) {
       alert("Password changed successfully.");
       handleCloseChangePasswordModal();
-    }else{
+    } else {
       alert("Failed to change password.");
     }
-    console.log("passwordcheck",passwordcheck.payload.value.message)
+    console.log("passwordcheck", passwordcheck.payload.value.message);
   };
 
   const RemoveUser = async () => {
     try {
       const response = await dispatch(DeleteUser({ userId: userId }) as any);
-      await AsyncStorage.multiRemove(["token", "userId", "anonymous","username,email"]);
+      await AsyncStorage.multiRemove([
+        "token",
+        "userId",
+        "anonymous",
+        "username,email",
+      ]);
       dispatch(updateToken(null));
       dispatch(anonymousUser(false));
       dispatch(updateUserId(null));
@@ -165,13 +192,12 @@ const EditSettingUserScreen = ({navigation}:any) => {
       dispatch(updateusername(null));
       dispatch(updateCart(null));
       dispatch(updateEmail(null));
-      console.log(response); 
-      console.log("Success")
+      console.log(response);
+      console.log("Success");
     } catch (error) {
       console.error(error);
     }
   };
-  
 
   const fetchData = async (username: any) => {
     try {
@@ -261,12 +287,12 @@ const EditSettingUserScreen = ({navigation}:any) => {
     >
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-        <Ionicons
-          name="arrow-back"
-          size={28}
-          color="black"
-          style={{ marginRight: 5 }}
-        />
+          <Ionicons
+            name="arrow-back"
+            size={28}
+            color="black"
+            style={{ marginRight: 5 }}
+          />
         </TouchableOpacity>
         <Text style={{ fontSize: 23, fontWeight: "500" }}>
           Account Information
@@ -587,39 +613,64 @@ const EditSettingUserScreen = ({navigation}:any) => {
         {/* Password End */}
 
         {/* Remove accunt Start */}
-        <View style={{ alignItems: "center", justifyContent: "center" }}>
-          <TouchableOpacity
-            style={[
-              {
-                padding: 10,
-                borderRadius: 20,
-                width: 160,
-                height: 45,
-                alignItems: "center",
-                marginTop: 50,
-                borderWidth: 2,
-                borderColor: "#ff5e5e",
-              },
-              {
-                backgroundColor: isPressed ? "red" : "#ffffff",
-                borderColor: isPressed ? "#ff00b3" : "red",
-              },
-            ]}
-            onPress={handleRemoveAccount}
+        {anonymous ? (
+          <View
+            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
           >
-            <View>
-              <Text
-                style={{
-                  fontSize: 15,
-                  fontWeight: "500",
-                  color: isPressed ? "white" : "black",
-                }}
-              >
-                Remove account
+            <TouchableOpacity
+              onPress={handleLogout}
+              style={{
+                width: 150,
+                height: 40,
+                backgroundColor: "#ff0000",
+                justifyContent: "center",
+                alignItems: "center",
+                position: "relative",
+                top: 150,
+                borderRadius: 10,
+              }}
+            >
+              <Text style={{ fontSize: 17, color: "#fff", fontWeight: "500" }}>
+                Login
               </Text>
-            </View>
-          </TouchableOpacity>
-        </View>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={{ alignItems: "center", justifyContent: "center" }}>
+            <TouchableOpacity
+              style={[
+                {
+                  padding: 10,
+                  borderRadius: 20,
+                  width: 160,
+                  height: 45,
+                  alignItems: "center",
+                  marginTop: 50,
+                  borderWidth: 2,
+                  borderColor: "#ff5e5e",
+                },
+                {
+                  backgroundColor: isPressed ? "red" : "#ffffff",
+                  borderColor: isPressed ? "#ff00b3" : "red",
+                },
+              ]}
+              onPress={handleRemoveAccount}
+            >
+              <View>
+                <Text
+                  style={{
+                    fontSize: 15,
+                    fontWeight: "500",
+                    color: isPressed ? "white" : "black",
+                  }}
+                >
+                  Remove account
+                </Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        )}
+
         {/* Remove accunt End */}
 
         {/* Remove account modal Start */}

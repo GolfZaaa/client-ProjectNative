@@ -18,9 +18,9 @@ import {
 } from "../../../assets/api/thailandData";
 import thailandData from "../../../assets/api/thailandData.json";
 import { Picker } from "@react-native-picker/picker";
-import { AntDesign } from '@expo/vector-icons';
+import { AntDesign } from "@expo/vector-icons";
 
-const Address = ({ navigation }: any) => {
+const EditAddressScreen = ({ navigation }: any) => {
   const [loading, setLoading] = useState(true);
   const [provinces, setProvinces] = useState<Province[]>([]);
   const [selectedProvince, setSelectedProvince] = useState<Province | null>(
@@ -103,50 +103,29 @@ const Address = ({ navigation }: any) => {
 
   return (
     <View style={styles.container}>
-  <View style={styles.bottomLinetop} ></View>
-  <View style={styles.bottomLinebot} ></View>
+      <View style={styles.bottomLinetop}></View>
+      <View style={styles.bottomLinebot}></View>
 
-  <View style={styles.header}>
-  <TouchableOpacity onPress={() => navigation.goBack()}>
-    <Ionicons
-      name="arrow-back"
-      size={28}
-      color="black"
-      style={{ marginRight: 5 }}
-    />
-  </TouchableOpacity>
-  <Text
-    style={{
-      flex: 1,
-      fontSize: 20,
-      fontWeight: "600",
-      textAlign: "center",
-    }}
-  >
-    Add Address to Order
-  </Text>
-</View>
-
-<View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center',paddingBottom:20}}>
-  <View style={{alignItems: 'center', justifyContent: 'center', width: 20, height: 20, backgroundColor: '#a500b4', borderRadius: 25}}>
-    <Text style={{color: 'white', fontSize: 13}}>1</Text>
-  </View>
-  <Text style={{fontSize: 15, marginLeft: 5, fontWeight: '500'}}>Set Address</Text>
-  <AntDesign
-    name="right"
-    size={18}
-    style={{paddingLeft: 10, paddingRight: 10}}
-    color="#d3d3d3"
-  />
-
-  <View style={{alignItems: 'center', justifyContent: 'center', width: 20, height: 20, backgroundColor: '#b1b1b1', borderRadius: 25}}>
-    <Text style={{color: 'white', fontSize: 13}}>2</Text>
-  </View>
-  <Text style={{fontSize: 15, marginLeft: 5, fontWeight: '400', color: '#b3b3b3'}}>Confirm Order</Text>
-</View>
-
-
-
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Ionicons
+            name="arrow-back"
+            size={28}
+            color="black"
+            style={{ marginRight: 5 }}
+          />
+        </TouchableOpacity>
+        <Text
+          style={{
+            flex: 1,
+            fontSize: 20,
+            fontWeight: "600",
+            textAlign: "center",
+          }}
+        >
+          Edit Address
+        </Text>
+      </View>
 
       <View style={[styles.inputContainer, { marginBottom: 13 }]}>
         <Text style={{ fontSize: 18, marginBottom: 10 }}>Country</Text>
@@ -274,7 +253,7 @@ const Address = ({ navigation }: any) => {
   );
 };
 
-export default Address;
+export default EditAddressScreen;
 
 const styles = StyleSheet.create({
   container: {
@@ -292,24 +271,23 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom:30,
+    marginBottom: 30,
   },
   bottomLinetop: {
-    borderWidth: 0.2, 
+    borderWidth: 0.2,
     width: 400,
-    position: 'absolute',
+    position: "absolute",
     top: 65,
-    borderColor:'#e2e2e2',
+    borderColor: "#e2e2e2",
   },
   bottomLinebot: {
-    borderWidth: 0.2, 
+    borderWidth: 0.2,
     width: 400,
-    position: 'absolute',
+    position: "absolute",
     top: 115,
-    borderColor:'#e2e2e2',
+    borderColor: "#e2e2e2",
   },
-  inputContainer: {
-  },
+  inputContainer: {},
   disabledInput: {
     borderWidth: 1,
     borderColor: "gray",

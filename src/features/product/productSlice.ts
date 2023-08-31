@@ -1,6 +1,30 @@
-import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { RootState } from "../../api/store";
-import agent from "../../api/agent";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { RootState } from "../api/store";
+import agent from "../api/agent";
+
+interface reviewImages {
+  id: number;
+  image : string;
+  reviewId : number;
+}
+
+interface user {
+  id: number;
+  userName : string;
+  email : string;
+}
+
+interface reviews {
+  id: number;
+  userId: string;
+  user : user;
+  productId: string;
+  texts:string;
+  date:Date;
+  star:number;
+  reviewImages:reviewImages[];
+}
+
 
 interface products {
   id: number;
@@ -10,6 +34,8 @@ interface products {
   description: string;
   type: string;
   imageUrls: string[];
+  image:string;
+  reviews: reviews;
 }
 
 interface ProductState {
@@ -77,6 +103,7 @@ const productSlice = createSlice({
 });
 
 export const selectProducts = (state: RootState) => state.product.products;
+export const selectProductsReview = (state: RootState) => state.product.products;
 export const isLoading = (state: RootState) => state.product.isLoading;
 export const selectType = (state: RootState) => state.product.type;
 

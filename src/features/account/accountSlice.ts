@@ -1,10 +1,7 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { RootState } from "../../api/store";
-import agent from "../../api/agent";
+import { RootState } from "../api/store";
+import agent from "../api/agent";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Alert } from "react-native";
-import { useDispatch } from "react-redux";
-import {useNavigation} from "@react-navigation/native"
 
 interface address {
   province: string;
@@ -28,6 +25,7 @@ interface AccountState {
   newEmail : string;
   newPassword : string;
   confirmPassword : string;
+  profileImage : string;
 }
 
 const initialState: AccountState = {
@@ -45,6 +43,7 @@ const initialState: AccountState = {
   newEmail : "",
   newPassword : "",
   confirmPassword : "",
+  profileImage : "",
 };
 
 export const  loginAsync = createAsyncThunk(
@@ -122,6 +121,7 @@ export const GetDetailUserById = createAsyncThunk(
   async ({username,}: {username: string;}) => {
     try {
       const response = await agent.Account.getSingleUser({username,});
+      console.log("response",response)
       return response;
     } catch (error) {
       throw error;
@@ -263,6 +263,17 @@ export const CreateNewPassword = createAsyncThunk("Authentication/ForgetPassword
   }
 );
 
+export const AddProfile = createAsyncThunk("Authentication/UploadProfileImage",
+  async ({userId,ProfileImage}: {userId: string, ProfileImage:string}) => {
+    try {
+      const response = await agent.Account.AddProfile({userId, ProfileImage});
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+);
+
 
 
 const accountSlice = createSlice({
@@ -284,6 +295,10 @@ const accountSlice = createSlice({
     },
     updateEmail: (state, action) => {
       state.email = action.payload;
+      // AsyncStorage.removeItem('email');
+    },
+    updateProfileImage: (state, action) => {
+      state.profileImage = action.payload;
       // AsyncStorage.removeItem('email');
     },
     anonymousUser: (state,action) => {
@@ -328,6 +343,7 @@ const accountSlice = createSlice({
         state.userid = action.payload.userid;
         state.anonymous = action.payload.anonymous;
         state.password = action.payload.password;
+        state.profileImage = action.payload.profileImage;
 
           AsyncStorage.setItem('anonymous', "true");
 
@@ -338,6 +354,8 @@ const accountSlice = createSlice({
           AsyncStorage.setItem('username', action.payload.username);
 
           AsyncStorage.setItem('email', action.payload.email);
+
+
 
       })
       .addCase(loginAsync.rejected, (state, action) => {
@@ -442,8 +460,13 @@ const accountSlice = createSlice({
       .addCase(GetDetailUserById.pending, (state) => {
         state.isLoading = true;
       })
+        // state.profileImage = action.payload.profileImage; การที่จะนำค่าเฉพาะ มานั้นต้องทำการ
+        // console.log(resposne) ของตัวนั้นก่อน GetDetailUserById เพื่อดูว่าค่านั้นมีอะไรบ้าง
+        // ถ้าทำการ state.profileImage = action.payload; คือการเอาค่าของ resposne ทั้งหมดมาใส่
+        // ไว้ที่ profileImage แบบนี้มันก็ใช้ได้แต่ต้องทำการ . เพื่อหาข้อมูลนั้นต่อด้วย 
       .addCase(GetDetailUserById.fulfilled, (state, action) => {
         state.isLoading = false;
+        state.profileImage = action.payload.profileImage;
       })
       .addCase(GetDetailUserById.rejected, (state, action) => {
         state.isLoading = false;
@@ -502,6 +525,16 @@ const accountSlice = createSlice({
         state.isLoading = false;
       })
 
+      .addCase(AddProfile.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(AddProfile.fulfilled, (state, action) => {
+        state.isLoading = false;
+      })
+      .addCase(AddProfile.rejected, (state, action) => {
+        state.isLoading = false;
+      })
+
   },
 });
 
@@ -514,8 +547,9 @@ export const selectanonymous = (state: RootState) => state.account.anonymous;
 export const selectstreet = (state: RootState) => state.account.address;
 export const selectChangeUsername = (state: RootState) => state.account.newUserName;
 export const selectPassword = (state: RootState) => state.account.password;
+export const selectProfileImage = (state: RootState) => state.account.profileImage;
 
 
-export const {changeemail,updatePassword,updateEmail,updateusername,changename,removeaddress,anonymousadd, test,updateToken,updateUserId,anonymousUser } = accountSlice.actions;
+export const {updateProfileImage,changeemail,updatePassword,updateEmail,updateusername,changename,removeaddress,anonymousadd, test,updateToken,updateUserId,anonymousUser } = accountSlice.actions;
 
 export default accountSlice.reducer;

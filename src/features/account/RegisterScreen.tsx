@@ -51,7 +51,7 @@ const RegisterScreen = ({ navigation }: any) => {
       alert("Register Create Successfully");
       navigation.navigate("confirmemail", { email });
     }
-    console.log("Register", test.payload.value.message);
+    console.log("Register", test);
   };
 
   const handleGuestVisit = () => {

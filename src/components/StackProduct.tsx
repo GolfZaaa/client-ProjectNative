@@ -9,8 +9,12 @@ import Address from "../features/account/address";
 import OrderScreen from "../features/checkout/OrderScreen";
 import ForgotPasswordScreen from "../features/account/ForgotPasswordScreen";
 import SettingScreen from "../features/account/EditSettingUserScreen";
-import EditAddressScreen from "../features/order/ConfirmyourOrder";
 import ConfirmyourOrder from "../features/order/ConfirmyourOrder";
+import WriteReviewScreen from "../features/review/WriteReviewScreen";
+import MyOrdersScreen from "../features/order/MyOrdersScreen";
+import CheckOutFailScreen from "../features/checkout/CheckOutFailScreen";
+import CheckOutSuccessScreen from "../features/checkout/CheckOutSuccessScreen";
+import EditAddressScreen from "../features/account/EditAddressScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -45,17 +49,38 @@ const StackProduct = () => {
         options={{ headerShown: false }}
       />
 
-<Stack.Screen
-              name="EditAddressScreen"
-              component={EditAddressScreen}
-              options={{ headerShown: false }}
-            />
-            
-            <Stack.Screen
-              name="ConfirmyourOrder"
-              component={ConfirmyourOrder}
-              options={{ headerShown: false }}
-            />
+      <Stack.Screen
+        name="EditAddressScreen"
+        component={EditAddressScreen}
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
+        name="ConfirmyourOrder"
+        component={ConfirmyourOrder}
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
+        name="WriteReviewScreen"
+        component={WriteReviewScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="MyOrder"
+        component={MyOrdersScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="CheckOutFailScreen"
+        component={CheckOutFailScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="CheckOutSuccessScreen"
+        component={CheckOutSuccessScreen}
+        options={{ headerShown: false }}
+      />
     </Stack.Navigator>
   );
 };

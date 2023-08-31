@@ -53,7 +53,7 @@ const TwoOptionModalAlertHaveAddress = ({
               }}
             >
               <TouchableOpacity onPress={onCancel} style={styles.cancelButton}>
-                <Text style={styles.buttonText}>Edit Address</Text>
+                <Text style={styles.buttonText}>Cancle</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={onConfirm}

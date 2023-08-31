@@ -10,6 +10,10 @@ const SettingScreen = ({ navigation }: any) => {
     navigation.navigate("EditSettingUserScreen");
   };
 
+  const HandlegoEditAddress = () => {
+    navigation.navigate("EditAddressScreen");
+  };
+
   return (
  <View style={{ padding: 40, flex: 1, backgroundColor: "#ffffff" }}>
       <View style={styles.header}>
@@ -54,45 +58,20 @@ const SettingScreen = ({ navigation }: any) => {
             borderRadius: 10,
             paddingHorizontal: 10,
           }}
-          onPress={HandlegotoAccount}
+          onPress={HandlegoEditAddress}
         >
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <View style={{ paddingLeft: 7 }}>
             <AntDesign name="customerservice" size={24} color="black" />
             </View>
             <Text style={{ fontSize: 17, marginLeft: 15 }}>
-              Terms of Service
+              Edit Address
             </Text>
           </View>
           <AntDesign name="right" size={24} color="black" />
         </TouchableOpacity>
       </View>
 
-      <View style={{marginBottom:20}}>
-        <TouchableOpacity
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-            width: "100%",
-            backgroundColor: "#f3f3f3",
-            height: 50,
-            borderRadius: 10,
-            paddingHorizontal: 10,
-          }}
-          onPress={HandlegotoAccount}
-        >
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <View style={{ paddingLeft: 7 }}>
-            <AntDesign name="questioncircleo" size={24} color="black" />
-            </View>
-            <Text style={{ fontSize: 17, marginLeft: 15 }}>
-              Support
-            </Text>
-          </View>
-          <AntDesign name="right" size={24} color="black" />
-        </TouchableOpacity>
-      </View>
     </View>
   )
 }

@@ -37,6 +37,7 @@ import Lottie from "lottie-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import TwoOptionModalAlert from "../features/component/TwoOptionModalAlertNoHaveAddress";
 import TwoOptionModalAlertHaveAddress from "../features/component/TwoOptionModalAlertHaveAddress";
+import { UrlFolderOrderImage, UrlImages } from "../features/api/agent";
 
 const { width, height } = Dimensions.get("window");
 
@@ -45,14 +46,11 @@ const StackCart = ({ navigation, route, item }: any) => {
   const userId = useSelector(selectuserid);
   const cart: any = useSelector(selectCartItems);
   const token = useSelector(selectToken);
-  const addressuser:any = useSelector(selectstreet);
+  const addressuser: any = useSelector(selectstreet);
 
   const [isModalVisible, setModalVisible] = useState(false);
   const [ModalVisibleHaveAddress, setModalVisibleHaveAddress] = useState(false);
 
-  // console.log("🤷‍♀️", addressuser.statusCode);
-  // console.log("😜", cart.items);
-  // console.log("addressuser",addressuser.value.subDistrict)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -79,13 +77,12 @@ const StackCart = ({ navigation, route, item }: any) => {
   };
 
   const handleGotoOrder = async (id: any) => {
-    navigation.navigate("orders");
-  };
-
-  const handleGotoEditAddress = async (id: any) => {
     navigation.navigate("ConfirmyourOrder");
     setModalVisibleHaveAddress(!ModalVisibleHaveAddress);
+  };
 
+  const handleCancleHaveAddress = async (id: any) => {
+    setModalVisibleHaveAddress(!ModalVisibleHaveAddress);
   };
 
   const toggleModal = () => {
@@ -106,12 +103,14 @@ const StackCart = ({ navigation, route, item }: any) => {
     toggleModal();
   };
 
-
-
   const handleLogout = async () => {
     if (token !== "") {
       try {
-        await AsyncStorage.multiRemove(["token", "userId", "anonymous,username"]);
+        await AsyncStorage.multiRemove([
+          "token",
+          "userId",
+          "anonymous,username",
+        ]);
         dispatch(updateToken(null));
         dispatch(anonymousUser(false));
         dispatch(updateUserId(null));
@@ -134,16 +133,35 @@ const StackCart = ({ navigation, route, item }: any) => {
     };
 
     const AddProduct = async (id: any) => {
+      const selectedProduct = cart.items.find((item: any) => item.product.id === id);
+
+      const maxAmount = selectedProduct
+    ? selectedProduct.product.quantityInStock - selectedProduct.amount
+    : 0;
+    if (maxAmount > 0) {
+      const amountToAdd = Math.min(maxAmount, 1); 
       await dispatch(
-        addProductAsync({ userId, amount: 1, productId: id }) as any
+        addProductAsync({ userId, amount: amountToAdd, productId: id }) as any
       );
+
       await dispatch(getCartAsync({ userId }));
-    };
+    }
+  };
 
     const DeleteProductAll = async (id: any) => {
       await dispatch(deleteProductAsyncAll({ userId, productId: id }) as any);
       await dispatch(getCartAsync({ userId }));
     };
+
+    const productName = item.product.name;
+    const maxLength = 18;
+
+    let trimmedName = productName;
+    if (productName.length > maxLength) {
+      trimmedName = productName.substring(0, maxLength - 3) + "...";
+    }
+
+    console.log("item",item)
 
     return (
       <>
@@ -156,7 +174,7 @@ const StackCart = ({ navigation, route, item }: any) => {
                 borderRadius: 20,
               }}
               source={{
-                uri: item.product.imageUrls[0],
+                uri: UrlFolderOrderImage + item.product.image,
               }}
             />
             <View
@@ -168,7 +186,7 @@ const StackCart = ({ navigation, route, item }: any) => {
               }}
             >
               <Text style={{ fontWeight: "bold", fontSize: 16 }}>
-                {item.product.name}
+                {trimmedName}
               </Text>
               <Text style={{ fontSize: 13, color: "gray" }}>
                 Type : {item.product.type}
@@ -261,21 +279,23 @@ const StackCart = ({ navigation, route, item }: any) => {
               </View>
 
               {addressuser.statusCode === 400 ? (
-                <View style={{ marginTop: 40,position:'absolute' }}>
+                <View style={{ marginTop: 40, position: "absolute" }}>
                   <TouchableOpacity
                     style={{
                       width: 330,
                       backgroundColor: "#ff8f1f",
-                      top:100,
+                      top: 100,
                       height: 60,
                       borderRadius: 30,
                       alignItems: "center",
                       justifyContent: "center",
-                      left:10
+                      left: 10,
                     }}
                     onPress={toggleModal}
                   >
-                    <Text style={{ color: "#fff", fontSize: 25, fontWeight: "600" }}>
+                    <Text
+                      style={{ color: "#fff", fontSize: 25, fontWeight: "600" }}
+                    >
                       Order
                     </Text>
                   </TouchableOpacity>
@@ -297,7 +317,7 @@ const StackCart = ({ navigation, route, item }: any) => {
                   </View>
                 </View>
               ) : (
-                <View style={{position:'absolute',}}>
+                <View style={{ position: "absolute" }}>
                   <TouchableOpacity
                     style={{
                       width: 330,
@@ -307,8 +327,8 @@ const StackCart = ({ navigation, route, item }: any) => {
                       borderRadius: 30,
                       alignItems: "center",
                       justifyContent: "center",
-                      top:75,
-                      left:10
+                      top: 75,
+                      left: 10,
                     }}
                     onPress={toggleModalHaveAddress}
                   >
@@ -319,22 +339,21 @@ const StackCart = ({ navigation, route, item }: any) => {
                     </Text>
                   </TouchableOpacity>
 
-                <View
-                style={{
-                  flex: 1,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <TwoOptionModalAlertHaveAddress
-                  isVisible={ModalVisibleHaveAddress}
-                  title={"Confirm delivery address"}
-                  onConfirm={handleGotoOrder}
-                  onCancel={handleGotoEditAddress}
-                />
-              </View>
-              </View>
-
+                  <View
+                    style={{
+                      flex: 1,
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <TwoOptionModalAlertHaveAddress
+                      isVisible={ModalVisibleHaveAddress}
+                      title={"Confirm delivery address"}
+                      onConfirm={handleGotoOrder}
+                      onCancel={handleCancleHaveAddress}
+                    />
+                  </View>
+                </View>
               )}
             </View>
           ) : (
@@ -346,7 +365,16 @@ const StackCart = ({ navigation, route, item }: any) => {
                   loop
                 />
               </View>
-              <Text style={{textAlign:'center',fontSize:40,fontWeight:'700',color:'gray'}}>Cart is Empty</Text>
+              <Text
+                style={{
+                  textAlign: "center",
+                  fontSize: 40,
+                  fontWeight: "700",
+                  color: "gray",
+                }}
+              >
+                Cart is Empty
+              </Text>
             </View>
           )}
 

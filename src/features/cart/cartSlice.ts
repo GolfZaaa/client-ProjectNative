@@ -1,6 +1,5 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { RootState } from "../../api/store";
-import agent from "../../api/agent";
+import agent from "../api/agent";
 
 interface Product {
   id: number;

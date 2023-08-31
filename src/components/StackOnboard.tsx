@@ -29,7 +29,7 @@ const StackOnboard = ({navigation}:any) => {
             </View>
            ),
             title: 'Boost Productivty',
-             subtitle: 'Done with React Native Onboarding Swiper',
+             subtitle: 'welcoming, orientation, and integration of new members, employees, users, or components into an existing setup ',
            },
            {
             backgroundColor: '#ffed89',
@@ -39,7 +39,7 @@ const StackOnboard = ({navigation}:any) => {
         </View>
             ),
              title: 'Work Seamlessly',
-              subtitle: 'Done with React Native Onboarding Swiper',
+              subtitle: 'Information, training, resources, and access to tools to ensure a smooth transition into their roles.',
            },
            {
             backgroundColor: '#6e8dfd',
@@ -49,7 +49,7 @@ const StackOnboard = ({navigation}:any) => {
         </View>
             ),
              title: 'Achieve Higher Goals',
-              subtitle: 'Done with React Native Onboarding Swiper',
+              subtitle: 'Integrating new software modules, hardware components, or services into an existing system or architecture.',
            },
         ]}
             />

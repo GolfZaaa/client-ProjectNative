@@ -25,6 +25,8 @@ import { AntDesign } from "@expo/vector-icons";
 import { Feather } from "@expo/vector-icons";
 import Sildemenu from "../component/Sildemenu";
 import StackCart from "../../components/StackCart";
+import { selectProfileImage, selectusername } from "../account/accountSlice";
+import { UrlFolderOrderImage, UrlImages } from "../api/agent";
 
 const ProductScreen = ({ navigation }: any) => {
   const dispatch = useDispatch();
@@ -32,9 +34,15 @@ const ProductScreen = ({ navigation }: any) => {
 
   //ฟังก์ชั่น Select Product Start
   const products = useSelector(selectProducts);
+  const username = useSelector(selectusername);
 
   const [searchText, setSearchText] = useState("");
   const [filteredProducts, setFilteredProducts] = useState<any[]>(products);
+
+  //Pagination Start
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 2;
+  //Pagination End
 
   useEffect(() => {
     const handleSearch = () => {
@@ -105,9 +113,34 @@ const ProductScreen = ({ navigation }: any) => {
     );
   }
 
-
   return (
     <View style={{ backgroundColor: "white", height: "100%" }}>
+      <View style={{ flexDirection: "row" }}>
+        <Text
+          style={{
+            paddingLeft: 30,
+            paddingRight: 30,
+            fontSize: 35,
+            fontWeight: "500",
+            top: 50,
+            marginBottom: 5,
+          }}
+        >
+          Hello,
+        </Text>
+        <Text
+          style={{
+            fontSize: 35,
+            fontWeight: "600",
+            top: 50,
+            marginBottom: 5,
+            right: 20,
+          }}
+        >
+          {username}
+        </Text>
+      </View>
+
       <Text style={styles.title}>Product Collections</Text>
 
       <Sildemenu navigation={navigation} />
@@ -174,82 +207,99 @@ const ProductScreen = ({ navigation }: any) => {
       </View>
 
       <ScrollView>
-        {filteredProducts.map((product: any) => (
-          <TouchableOpacity
-          key={product.id}
-            onPress={() =>
-              navigation.push("productDetail", { productId: product })
-            }
-          >
-            <View style={styles.cardproduct}>
-              <Image
-                style={{
-                  width: 170,
-                  height: "100%",
-                  borderRadius: 20,
-                }}
-                source={{
-                  uri: product.imageUrls[0],
-                }}
-              />
-              <View style={{ position: "absolute", left: 190, marginTop: 20 }}>
-                <Text style={{ fontSize: 18, fontWeight: "400" }}>
-                  {product.name}
-                </Text>
-                <Text
+        {filteredProducts
+          .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+          .map((product: any) => (
+            <TouchableOpacity
+              key={product.id}
+              onPress={() =>
+                navigation.push("productDetail", { productId: product })
+              }
+            >
+              <View style={styles.cardproduct}>
+                <Image
                   style={{
-                    color: "gray",
-                    fontSize: 12,
-                    marginBottom: 10,
-                    fontWeight: "400",
+                    width: 170,
+                    height: "100%",
+                    borderRadius: 20,
                   }}
-                >
-                  Type {product.type}
-                </Text>
-                <Text
-                  style={{
-                    color: "gray",
-                    fontSize: 14,
-                    marginBottom: 10,
-                    fontWeight: "400",
-                    right: 4,
+                  source={{
+                    // uri: product.imageUrls[0],
+                    uri:  product.image,
                   }}
+                />
+                <View
+                  style={{ position: "absolute", left: 190, marginTop: 20 }}
                 >
-                  {product.description.substring(0, 20)}
-                </Text>
-                <Text style={{ color: "gray" }}>
-                  QuantityInStock : {product.quantityInStock}
-                </Text>
-                <Text
-                  style={{
-                    fontWeight: "700",
-                    position: "relative",
-                    top: 20,
-                    fontSize: 18,
-                  }}
-                >
-                  ${product.price}.{" "}
-                </Text>
-                <Text
-                  style={{
-                    position: "absolute",
-                    top: 129,
-                    left: 48,
-                    fontWeight: "600",
-                    fontSize: 13,
-                  }}
-                >
-                  00
-                </Text>
-                <TouchableOpacity>
-                  <View style={styles.button}>
-                    <Text style={styles.buttonText}>Buy</Text>
+                  <Text style={{ fontSize: 18, fontWeight: "400" }}>
+                    {product.name}
+                  </Text>
+                  <Text
+                    style={{
+                      color: "gray",
+                      fontSize: 12,
+                      marginBottom: 10,
+                      fontWeight: "400",
+                    }}
+                  >
+                    Type {product.type}
+                  </Text>
+                  <Text
+                    style={{
+                      color: "gray",
+                      fontSize: 14,
+                      marginBottom: 10,
+                      fontWeight: "400",
+                    }}
+                  >
+                    {product.description.substring(0, 20)}
+                  </Text>
+                  <Text style={{ color: "gray" }}>
+                    QuantityInStock : {product.quantityInStock}
+                  </Text>
+                  <View>
+                    <Text
+                      style={{
+                        fontWeight: "600",
+                        position: "relative",
+                        top: 20,
+                        fontSize: 18,
+                      }}
+                    >
+                      ${product.price}.00
+                    </Text>
                   </View>
-                </TouchableOpacity>
+                </View>
               </View>
-            </View>
+            </TouchableOpacity>
+          ))}
+
+        <View style={styles.paginationContainer}>
+          
+          <TouchableOpacity
+            onPress={() => setCurrentPage(currentPage - 1)}
+            disabled={currentPage === 1}
+            style={[
+              styles.paginationButton,
+              currentPage === 1 && styles.disabledButton,
+            ]}
+          >
+      <AntDesign name="left" size={24} color="white" />
           </TouchableOpacity>
-        ))}
+
+          <Text style={styles.paginationText}>{currentPage}</Text>
+          <TouchableOpacity
+            onPress={() => setCurrentPage(currentPage + 1)}
+            disabled={currentPage * itemsPerPage >= filteredProducts.length}
+            style={[
+              styles.paginationButton,
+              currentPage * itemsPerPage >= filteredProducts.length &&
+                styles.disabledButton,
+            ]}
+          >
+            <Text style={styles.buttonText}><AntDesign name="right" size={24} color="white" /></Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </View>
   );
@@ -257,11 +307,11 @@ const ProductScreen = ({ navigation }: any) => {
 
 const styles = StyleSheet.create({
   title: {
-    marginTop: 100,
+    marginTop: 50,
     marginLeft: 30,
     marginRight: 30,
     fontSize: 25,
-    fontWeight: "600",
+    fontWeight: "500",
     marginBottom: 5,
   },
   searchContainer: {
@@ -317,9 +367,11 @@ const styles = StyleSheet.create({
   cardproduct: {
     width: 350,
     height: 200,
-    backgroundColor: "#feeded",
+    backgroundColor: "#e7e7e732",
     margin: 20,
     borderRadius: 35,
+    borderWidth: 0.3,
+    borderColor: "gray",
   },
   button: {
     backgroundColor: "#4b4b4b",
@@ -334,6 +386,28 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 14,
     fontWeight: "bold",
+    justifyContent:'center',
+  },
+  paginationContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginVertical: 10,
+  },
+  paginationButton: {
+    backgroundColor: "#4b4b4b",
+    borderRadius: 11,
+    width: 100,
+    height: 30,
+    justifyContent: "center", 
+    alignItems: "center", 
+  },
+  disabledButton: {
+    backgroundColor: "#ccc",
+  },
+  paginationText: {
+    marginHorizontal: 10,
+    fontSize:22,
+    fontWeight:'500'
   },
 });
 

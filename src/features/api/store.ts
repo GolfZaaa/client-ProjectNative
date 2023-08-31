@@ -1,15 +1,17 @@
 import { configureStore } from '@reduxjs/toolkit';
-import accountreducer from '../features/account/accountSlice';
-import productReducer from '../features/product/productSlice';
-import cartReducer from '../features/cart/cartSlice';
-import orderReducer from '../features/order/orderSlice';
+import accountreducer from '../account/accountSlice';
+import productReducer from '../product/productSlice';
+import cartReducer from '../cart/cartSlice';
+import orderReducer from '../order/orderSlice';
+import reviewReducer from '../review/reviewSlice';
 
 const store = configureStore({
   reducer: {
     account: accountreducer,
     product: productReducer,
     cart: cartReducer,
-    order: orderReducer
+    order: orderReducer,
+    reivew: reviewReducer
   },
 });
 
